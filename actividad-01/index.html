@@ -370,7 +370,10 @@
           captchaStatus.textContent = "Incorrecto. Debe comenzar nuevamente.";
           captchaStatus.className = "status error";
 
-          resetCaptcha();
+          setTimeout(() => {
+            resetCaptcha();
+          }, 800);
+
           return;
         }
 
@@ -398,6 +401,9 @@
         revealedCells.clear();
 
         setupCanvas();
+
+        captchaStatus.textContent = "";
+        captchaStatus.className = "status";
       }
 
       scratchCanvas.addEventListener("mousedown", () => {
@@ -434,7 +440,6 @@
           return;
         }
 
-        // nuevo captcha y nueva grilla en cada intento
         TARGET_CODE = generateCaptchaCode();
         captchaTarget.textContent = TARGET_CODE;
 
