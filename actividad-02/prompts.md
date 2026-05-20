@@ -26,7 +26,7 @@ DELETE /pacientes/{dni}/turnos/{idturno}: para borrar un turno de un paciente. D
 Para el endpoint GET /pacientes no devuelvas error. Devolvé un array vacío si aún no hay pacientes en el sistema
 ```
 
-## 3. Se corrige para GET /pacientes/{dni}/turnos el error a devolver. Sólo se devuelve erro si no se encontró el paciente por dni. EN caso de que no haya turnos asociados, se devulve array vacio
+## 3. Se corrige para GET /pacientes/{dni}/turnos el error a devolver. Sólo se devuelve error si no se encontró el paciente por dni. En caso de que no haya turnos asociados, se devuelve array vacio
 
 ```txt
 para GET /pacientes/{dni}/turnos se devulve error si no existe el paciente en el sistema (no se encuentra mediante el dni). si no se encuentran turnos asociados se devulve array vacio
