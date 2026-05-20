@@ -1,0 +1,397 @@
+openapi: 3.0.3
+info:
+  title: API de Gestión de Turnos Médicos
+  description: API REST para gestionar pacientes y sus turnos médicos.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: Servidor local
+
+tags:
+  - name: Pacientes
+    description: Operaciones relacionadas con pacientes
+  - name: Turnos
+    description: Operaciones relacionadas con turnos médicos
+
+paths:
+  /pacientes:
+    post:
+      tags:
+        - Pacientes
+      summary: Crear un paciente
+      description: Crea un nuevo paciente en el sistema.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PacienteCreate"
+            example:
+              nombre: Ana
+              apellido: Gomez
+              dni: "30111222"
+              obra_social: OSDE
+              fecha_nacimiento: "1990-05-20"
+              telefono: "3815551234"
+              email: ana.gomez@email.com
+      responses:
+        "201":
+          description: Paciente creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Paciente"
+              example:
+                idpaciente: 1
+                nombre: Ana
+                apellido: Gomez
+                dni: "30111222"
+                obra_social: OSDE
+                fecha_nacimiento: "1990-05-20"
+                telefono: "3815551234"
+                email: ana.gomez@email.com
+        "400":
+          description: No se pudo crear el paciente por datos inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                mensaje: Datos inválidos para crear el paciente.
+
+    get:
+      tags:
+        - Pacientes
+      summary: Obtener pacientes
+      description: Obtiene la lista de pacientes creados. Opcionalmente se puede limitar la cantidad de resultados con el parámetro `limit`.
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Cantidad máxima de pacientes a devolver.
+          schema:
+            type: integer
+            minimum: 1
+            example: 10
+      responses:
+        "200":
+          description: Lista de pacientes obtenida correctamente. Si no existen pacientes, se devuelve un array vacío.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Paciente"
+              example:
+                - idpaciente: 1
+                  nombre: Ana
+                  apellido: Gomez
+                  dni: "30111222"
+                  obra_social: OSDE
+                  fecha_nacimiento: "1990-05-20"
+                  telefono: "3815551234"
+                  email: ana.gomez@email.com
+                - idpaciente: 2
+                  nombre: Juan
+                  apellido: Perez
+                  dni: "28555444"
+                  obra_social: Swiss Medical
+                  fecha_nacimiento: "1988-11-03"
+                  telefono: "3814445678"
+                  email: juan.perez@email.com
+
+  /pacientes/{dni}:
+    get:
+      tags:
+        - Pacientes
+      summary: Obtener un paciente por DNI
+      description: Obtiene los datos de un paciente a partir de su DNI.
+      parameters:
+        - $ref: "#/components/parameters/DniParam"
+      responses:
+        "200":
+          description: Paciente encontrado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Paciente"
+              example:
+                idpaciente: 1
+                nombre: Ana
+                apellido: Gomez
+                dni: "30111222"
+                obra_social: OSDE
+                fecha_nacimiento: "1990-05-20"
+                telefono: "3815551234"
+                email: ana.gomez@email.com
+        "404":
+          description: No se encontró el paciente indicado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                mensaje: No se encontró un paciente con el DNI indicado.
+  /pacientes/{dni}/turnos:
+    post:
+      tags:
+        - Turnos
+      summary: Crear un turno para un paciente
+      description: Crea un nuevo turno médico asociado al paciente identificado por DNI.
+      parameters:
+        - $ref: "#/components/parameters/DniParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TurnoCreate"
+            example:
+              fecha: "2026-06-10"
+              hora: "09:30"
+              especialidad: Cardiología
+      responses:
+        "201":
+          description: Turno creado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Turno"
+              example:
+                idturno: 1
+                fecha: "2026-06-10"
+                hora: "09:30"
+                especialidad: Cardiología
+        "404":
+          description: No se encontró el paciente indicado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                mensaje: No se encontró un paciente con el DNI indicado.
+
+    get:
+      tags:
+        - Turnos
+      summary: Obtener turnos de un paciente
+      description: Obtiene todos los turnos asociados al paciente identificado por DNI. Si el paciente no posee turnos asociados, se devuelve un array vacío.
+      parameters:
+        - $ref: "#/components/parameters/DniParam"
+      responses:
+        "200":
+          description: Turnos del paciente obtenidos correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Turno"
+              example:
+                - idturno: 1
+                  fecha: "2026-06-10"
+                  hora: "09:30"
+                  especialidad: Cardiología
+                - idturno: 2
+                  fecha: "2026-07-01"
+                  hora: "11:00"
+                  especialidad: Dermatología
+        "404":
+          description: No se encontró el paciente indicado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                mensaje: No se encontró un paciente con el DNI indicado.
+
+  /pacientes/{dni}/turnos/{idturno}:
+    delete:
+      tags:
+        - Turnos
+      summary: Eliminar un turno de un paciente
+      description: Elimina un turno asociado a un paciente. Solo se permite eliminar el turno si la fecha actual es menor a la fecha del turno, es decir, si se trata de un turno futuro.
+      parameters:
+        - $ref: "#/components/parameters/DniParam"
+        - name: idturno
+          in: path
+          required: true
+          description: Identificador del turno a eliminar.
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: Turno eliminado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mensaje"
+              example:
+                mensaje: Turno eliminado correctamente.
+        "404":
+          description: No se encontró el paciente, no se encontró el turno o el turno no puede eliminarse porque no es futuro.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                pacienteNoEncontrado:
+                  summary: Paciente no encontrado
+                  value:
+                    mensaje: No se encontró un paciente con el DNI indicado.
+                turnoNoEncontrado:
+                  summary: Turno no encontrado
+                  value:
+                    mensaje: No se encontró el turno indicado para el paciente.
+                turnoNoFuturo:
+                  summary: Turno no futuro
+                  value:
+                    mensaje: El turno no puede eliminarse porque no es futuro.
+
+components:
+  parameters:
+    DniParam:
+      name: dni
+      in: path
+      required: true
+      description: DNI del paciente.
+      schema:
+        type: string
+        example: "30111222"
+
+  schemas:
+    Paciente:
+      type: object
+      required:
+        - idpaciente
+        - nombre
+        - apellido
+        - dni
+        - obra_social
+        - fecha_nacimiento
+        - telefono
+        - email
+      properties:
+        idpaciente:
+          type: integer
+          description: Identificador único del paciente.
+          example: 1
+        nombre:
+          type: string
+          example: Ana
+        apellido:
+          type: string
+          example: Gomez
+        dni:
+          type: string
+          description: Documento Nacional de Identidad del paciente.
+          example: "30111222"
+        obra_social:
+          type: string
+          example: OSDE
+        fecha_nacimiento:
+          type: string
+          format: date
+          example: "1990-05-20"
+        telefono:
+          type: string
+          example: "3815551234"
+        email:
+          type: string
+          format: email
+          example: ana.gomez@email.com
+
+    PacienteCreate:
+      type: object
+      required:
+        - nombre
+        - apellido
+        - dni
+        - obra_social
+        - fecha_nacimiento
+        - telefono
+        - email
+      properties:
+        nombre:
+          type: string
+          example: Ana
+        apellido:
+          type: string
+          example: Gomez
+        dni:
+          type: string
+          example: "30111222"
+        obra_social:
+          type: string
+          example: OSDE
+        fecha_nacimiento:
+          type: string
+          format: date
+          example: "1990-05-20"
+        telefono:
+          type: string
+          example: "3815551234"
+        email:
+          type: string
+          format: email
+          example: ana.gomez@email.com
+
+    Turno:
+      type: object
+      required:
+        - idturno
+        - fecha
+        - hora
+        - especialidad
+      properties:
+        idturno:
+          type: integer
+          description: Identificador único del turno.
+          example: 1
+        fecha:
+          type: string
+          format: date
+          example: "2026-06-10"
+        hora:
+          type: string
+          pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+          example: "09:30"
+        especialidad:
+          type: string
+          description: Especialidad médica para la cual se solicita el turno.
+          example: Cardiología
+
+    TurnoCreate:
+      type: object
+      required:
+        - fecha
+        - hora
+        - especialidad
+      properties:
+        fecha:
+          type: string
+          format: date
+          example: "2026-06-10"
+        hora:
+          type: string
+          pattern: "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+          example: "09:30"
+        especialidad:
+          type: string
+          example: Cardiología
+
+    Mensaje:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: Operación realizada correctamente.
+
+    Error:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: Ocurrió un error.
