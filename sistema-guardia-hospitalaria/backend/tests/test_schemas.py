@@ -1,4 +1,6 @@
+import pytest
 from datetime import date, datetime, timezone
+from pydantic import ValidationError
 from schemas.paciente import PacienteCreate, PacienteResponse
 from schemas.medico import MedicoCreate, MedicoResponse
 
@@ -61,8 +63,6 @@ def test_paciente_response_desde_orm(db):
 
 
 def test_medico_create_especialidad_requerida():
-    import pytest
-    from pydantic import ValidationError
     with pytest.raises(ValidationError):
         MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999", username="drgarcia", password="clave")
 
