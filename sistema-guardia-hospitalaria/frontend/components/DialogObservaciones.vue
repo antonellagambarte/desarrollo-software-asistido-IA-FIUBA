@@ -55,6 +55,7 @@ function cerrar() {
 }
 
 async function guardar() {
+  if (!props.ingreso) return
   guardando.value = true
   try {
     await actualizarObservaciones(props.ingreso.id, texto.value || null)
