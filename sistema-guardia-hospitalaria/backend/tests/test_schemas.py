@@ -85,3 +85,53 @@ def test_medico_response_desde_orm(db):
     response = MedicoResponse.model_validate(medico)
     assert response.matricula == "MP77777"
     assert response.especialidad == "Traumatología"
+
+
+from schemas.ingreso_guardia import IngresoGuardiaCreate, IngresoGuardiaResponse
+from models.ingreso_guardia import EstadoIngreso, Prioridad
+
+
+def test_ingreso_create_campos_requeridos():
+    i = IngresoGuardiaCreate(paciente_id=1, prioridad=Prioridad.ALTA)
+    assert i.prioridad == Prioridad.ALTA
+    assert i.paciente_id == 1
+
+
+def test_ingreso_response_medico_opcional():
+    from schemas.paciente import PacienteResponse
+    paciente = PacienteResponse(
+        id=1, dni="12345678", nombre="Juan", apellido="Pérez",
+        fecha_nacimiento=date(1990, 1, 1),
+    )
+    i = IngresoGuardiaResponse(
+        id=1,
+        paciente_id=1,
+        medico_id=None,
+        estado=EstadoIngreso.EN_ESPERA,
+        prioridad=Prioridad.ALTA,
+        fecha_ingreso=datetime.utcnow(),
+        paciente=paciente,
+        medico=None,
+    )
+    assert i.medico is None
+    assert i.estado == EstadoIngreso.EN_ESPERA
+
+
+def test_ingreso_response_desde_orm(db):
+    from models.paciente import Paciente
+    from models.ingreso_guardia import IngresoGuardia
+
+    paciente = Paciente(dni="33333333", nombre="Clara", apellido="Núñez", fecha_nacimiento=date(1992, 4, 12))
+    db.add(paciente)
+    db.commit()
+
+    ingreso = IngresoGuardia(paciente_id=paciente.id, prioridad=Prioridad.MEDIA)
+    db.add(ingreso)
+    db.commit()
+    db.refresh(ingreso)
+
+    _ = ingreso.paciente  # forzar carga lazy de la relación
+    response = IngresoGuardiaResponse.model_validate(ingreso)
+    assert response.estado == EstadoIngreso.EN_ESPERA
+    assert response.paciente.dni == "33333333"
+    assert response.medico is None
