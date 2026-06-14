@@ -11,5 +11,7 @@ class Medico(Base):
     apellido = Column(String, nullable=False)
     matricula = Column(String, unique=True, nullable=False)
     especialidad = Column(String, nullable=True)
+    username = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=False)
 
     ingresos = relationship("IngresoGuardia", back_populates="medico")

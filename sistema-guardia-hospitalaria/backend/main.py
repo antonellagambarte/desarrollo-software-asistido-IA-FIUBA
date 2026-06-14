@@ -5,6 +5,7 @@ import models  # noqa: F401 — registers all models so create_all includes all 
 from routers.paciente import router as paciente_router
 from routers.medico import router as medico_router
 from routers.ingreso_guardia import router as ingreso_router
+from routers.auth import router as auth_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -20,6 +21,7 @@ app.add_middleware(
 app.include_router(paciente_router)
 app.include_router(medico_router)
 app.include_router(ingreso_router)
+app.include_router(auth_router)
 
 
 @app.get("/")

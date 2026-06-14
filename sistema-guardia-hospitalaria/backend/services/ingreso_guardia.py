@@ -57,3 +57,15 @@ def asignar_medico(db: Session, ingreso_id: int, medico_id: int) -> IngresoGuard
     db.commit()
     db.refresh(ingreso)
     return ingreso
+
+
+def actualizar_observaciones(db: Session, ingreso_id: int, observaciones: Optional[str]) -> IngresoGuardia:
+    ingreso = db.get(IngresoGuardia, ingreso_id)
+    if ingreso is None:
+        raise LookupError(f"Ingreso con id {ingreso_id} no encontrado")
+    if ingreso.estado == EstadoIngreso.ALTA:
+        raise ValueError("El ingreso con estado ALTA no puede modificarse")
+    ingreso.observaciones = observaciones
+    db.commit()
+    db.refresh(ingreso)
+    return ingreso
