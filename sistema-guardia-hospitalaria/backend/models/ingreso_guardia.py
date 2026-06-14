@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
@@ -25,7 +25,7 @@ class IngresoGuardia(Base):
     medico_id = Column(Integer, ForeignKey("medicos.id"), nullable=True)
     estado = Column(SAEnum(EstadoIngreso), default=EstadoIngreso.EN_ESPERA, nullable=False)
     prioridad = Column(SAEnum(Prioridad), nullable=False)
-    fecha_ingreso = Column(DateTime, default=datetime.utcnow, nullable=False)
+    fecha_ingreso = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     observaciones = Column(Text, nullable=True)
 
     paciente = relationship("Paciente", back_populates="ingresos")

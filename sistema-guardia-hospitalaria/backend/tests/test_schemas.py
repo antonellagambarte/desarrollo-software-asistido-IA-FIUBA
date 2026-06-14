@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from schemas.paciente import PacienteCreate, PacienteResponse
 from schemas.medico import MedicoCreate, MedicoResponse
 
@@ -109,7 +109,7 @@ def test_ingreso_response_medico_opcional():
         medico_id=None,
         estado=EstadoIngreso.EN_ESPERA,
         prioridad=Prioridad.ALTA,
-        fecha_ingreso=datetime.utcnow(),
+        fecha_ingreso=datetime.now(timezone.utc),
         paciente=paciente,
         medico=None,
     )
