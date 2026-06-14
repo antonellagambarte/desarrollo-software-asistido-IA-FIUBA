@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useSidebarItems } from '~/composables/useSidebarItems'
 
 const { items } = useSidebarItems()
@@ -41,7 +41,6 @@ const SIDEBAR_LINKS = [
 ]
 
 onMounted(() => { items.value = SIDEBAR_LINKS })
-onUnmounted(() => { items.value = [] })
 
 function mostrarError(msg) {
   snackbar.value = { visible: true, mensaje: msg, color: 'error' }
