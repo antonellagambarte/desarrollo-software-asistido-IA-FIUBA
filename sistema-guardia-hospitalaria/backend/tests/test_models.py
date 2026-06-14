@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 import pytest
 from models.paciente import Paciente
 from models.medico import Medico
+from models.ingreso_guardia import IngresoGuardia, EstadoIngreso, Prioridad
 
 
 def test_crear_paciente(db):
@@ -74,3 +75,53 @@ def test_medico_especialidad_opcional(db):
     db.commit()
     db.refresh(medico)
     assert medico.especialidad is None
+
+
+def test_crear_ingreso_estado_inicial(db):
+    paciente = Paciente(dni="77777777", nombre="Sofía", apellido="Vega", fecha_nacimiento=date(1995, 3, 20))
+    db.add(paciente)
+    db.commit()
+
+    ingreso = IngresoGuardia(paciente_id=paciente.id, prioridad=Prioridad.ALTA)
+    db.add(ingreso)
+    db.commit()
+    db.refresh(ingreso)
+
+    assert ingreso.id is not None
+    assert ingreso.estado == EstadoIngreso.EN_ESPERA
+    assert ingreso.medico_id is None
+    assert ingreso.fecha_ingreso is not None
+    assert ingreso.observaciones is None
+
+
+def test_ingreso_relacion_paciente(db):
+    paciente = Paciente(dni="66666666", nombre="Lucía", apellido="Torres", fecha_nacimiento=date(1988, 7, 10))
+    db.add(paciente)
+    db.commit()
+
+    ingreso = IngresoGuardia(paciente_id=paciente.id, prioridad=Prioridad.MEDIA)
+    db.add(ingreso)
+    db.commit()
+    db.refresh(ingreso)
+
+    assert ingreso.paciente.nombre == "Lucía"
+
+
+def test_ingreso_con_medico(db):
+    paciente = Paciente(dni="55555555", nombre="Martín", apellido="Ríos", fecha_nacimiento=date(1970, 11, 5))
+    medico = Medico(nombre="Rosa", apellido="Flores", matricula="MP55555")
+    db.add_all([paciente, medico])
+    db.commit()
+
+    ingreso = IngresoGuardia(
+        paciente_id=paciente.id,
+        medico_id=medico.id,
+        prioridad=Prioridad.BAJA,
+        observaciones="Dolor de cabeza leve",
+    )
+    db.add(ingreso)
+    db.commit()
+    db.refresh(ingreso)
+
+    assert ingreso.medico.matricula == "MP55555"
+    assert ingreso.observaciones == "Dolor de cabeza leve"

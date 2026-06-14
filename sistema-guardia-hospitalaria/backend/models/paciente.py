@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy.orm import relationship
 from database import Base
 
 
@@ -12,5 +13,4 @@ class Paciente(Base):
     fecha_nacimiento = Column(Date, nullable=False)
     telefono = Column(String, nullable=True)
 
-    # ingresos: relación con IngresoGuardia se configura en models/ingreso_guardia.py
-    # para evitar dependencia circular en la resolución de mappers
+    ingresos = relationship("IngresoGuardia", back_populates="paciente")
