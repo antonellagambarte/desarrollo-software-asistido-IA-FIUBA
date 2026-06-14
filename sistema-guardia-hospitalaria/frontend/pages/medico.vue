@@ -12,7 +12,7 @@
 
       <TablaPacientesMedico
         ref="tablaRef"
-        :medico-id="authStore.medico.id"
+        :medico-id="authStore.medico?.id"
         @error="mostrarError"
       />
     </v-container>
