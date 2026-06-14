@@ -56,3 +56,53 @@ def test_listar_medicos_retorna_todos(client):
     response = client.get("/medicos/")
     assert response.status_code == 200
     assert len(response.json()) == 2
+
+
+PACIENTE_DATA = {
+    "dni": "55555555",
+    "nombre": "Marta",
+    "apellido": "Ruiz",
+    "fecha_nacimiento": "1980-03-10",
+}
+
+
+def test_medicos_con_carga_lista_vacia(client):
+    response = client.get("/medicos/con-carga")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_medicos_con_carga_sin_ingresos(client):
+    client.post("/medicos/", json=MEDICO_DATA)
+    response = client.get("/medicos/con-carga")
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["pacientes_en_espera"] == 0
+
+
+def test_medicos_con_carga_cuenta_en_espera(client):
+    medico = client.post("/medicos/", json=MEDICO_DATA).json()
+    paciente = client.post("/pacientes/", json=PACIENTE_DATA).json()
+    ingreso = client.post(
+        "/ingresos/", json={"paciente_id": paciente["id"], "prioridad": "ALTA"}
+    ).json()
+    client.patch(f"/ingresos/{ingreso['id']}/medico", json={"medico_id": medico["id"]})
+
+    response = client.get("/medicos/con-carga")
+    data = response.json()
+    assert data[0]["pacientes_en_espera"] == 1
+
+
+def test_medicos_con_carga_estado_personalizado(client):
+    medico = client.post("/medicos/", json=MEDICO_DATA).json()
+    paciente = client.post("/pacientes/", json=PACIENTE_DATA).json()
+    ingreso = client.post(
+        "/ingresos/", json={"paciente_id": paciente["id"], "prioridad": "ALTA"}
+    ).json()
+    client.patch(f"/ingresos/{ingreso['id']}/medico", json={"medico_id": medico["id"]})
+    client.patch(f"/ingresos/{ingreso['id']}/estado", json={"estado": "EN_ATENCION"})
+
+    en_espera = client.get("/medicos/con-carga?estado=EN_ESPERA").json()
+    en_atencion = client.get("/medicos/con-carga?estado=EN_ATENCION").json()
+    assert en_espera[0]["pacientes_en_espera"] == 0
+    assert en_atencion[0]["pacientes_en_espera"] == 1
