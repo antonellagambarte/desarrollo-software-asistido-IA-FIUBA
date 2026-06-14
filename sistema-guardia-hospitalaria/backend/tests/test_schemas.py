@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from schemas.paciente import PacienteCreate, PacienteResponse
+from schemas.medico import MedicoCreate, MedicoResponse
 
 # Importar todos los modelos al nivel de módulo para que SQLAlchemy registre
 # todas las clases antes de que conftest.py ejecute Base.metadata.create_all()
@@ -57,3 +58,30 @@ def test_paciente_response_desde_orm(db):
     response = PacienteResponse.model_validate(paciente)
     assert response.id == paciente.id
     assert response.edad >= 0
+
+
+def test_medico_create_campos_requeridos():
+    m = MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999")
+    assert m.especialidad is None
+
+
+def test_medico_create_con_especialidad():
+    m = MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999", especialidad="Cardiología")
+    assert m.especialidad == "Cardiología"
+
+
+def test_medico_response_tiene_id():
+    m = MedicoResponse(id=5, nombre="Ana", apellido="García", matricula="MP99999")
+    assert m.id == 5
+
+
+def test_medico_response_desde_orm(db):
+    from models.medico import Medico
+    medico = Medico(nombre="Roberto", apellido="Silva", matricula="MP77777", especialidad="Traumatología")
+    db.add(medico)
+    db.commit()
+    db.refresh(medico)
+
+    response = MedicoResponse.model_validate(medico)
+    assert response.matricula == "MP77777"
+    assert response.especialidad == "Traumatología"
