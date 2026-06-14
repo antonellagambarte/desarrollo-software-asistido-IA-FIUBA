@@ -8,6 +8,10 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
   ],
   vuetify: {
-    vuetifyOptions: {},
+    vuetifyOptions: {
+      theme: {
+        defaultTheme: 'light',
+      },
+    },
   },
 })
