@@ -12,6 +12,8 @@ MEDICO_DATA = {
     "apellido": "Silva",
     "matricula": "MN99999",
     "especialidad": "Guardia",
+    "username": "drsilva",
+    "password": "secreto123",
 }
 
 

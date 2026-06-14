@@ -51,6 +51,8 @@ def test_crear_medico(db):
         apellido="López",
         matricula="MP12345",
         especialidad="Clínica Médica",
+        username="drlopez",
+        password_hash="hashed",
     )
     db.add(medico)
     db.commit()
@@ -60,8 +62,8 @@ def test_crear_medico(db):
 
 
 def test_matricula_unica(db):
-    m1 = Medico(nombre="Ana", apellido="García", matricula="MP99999")
-    m2 = Medico(nombre="Luis", apellido="Ruiz", matricula="MP99999")
+    m1 = Medico(nombre="Ana", apellido="García", matricula="MP99999", username="drgarcia1", password_hash="h1")
+    m2 = Medico(nombre="Luis", apellido="Ruiz", matricula="MP99999", username="drruiz1", password_hash="h2")
     db.add(m1)
     db.commit()
     db.add(m2)
@@ -70,7 +72,7 @@ def test_matricula_unica(db):
 
 
 def test_medico_especialidad_opcional(db):
-    medico = Medico(nombre="Pedro", apellido="Sosa", matricula="MP00001")
+    medico = Medico(nombre="Pedro", apellido="Sosa", matricula="MP00001", username="drsosa", password_hash="hashed")
     db.add(medico)
     db.commit()
     db.refresh(medico)
@@ -109,7 +111,7 @@ def test_ingreso_relacion_paciente(db):
 
 def test_ingreso_con_medico(db):
     paciente = Paciente(dni="55555555", nombre="Martín", apellido="Ríos", fecha_nacimiento=date(1970, 11, 5))
-    medico = Medico(nombre="Rosa", apellido="Flores", matricula="MP55555")
+    medico = Medico(nombre="Rosa", apellido="Flores", matricula="MP55555", username="drflores", password_hash="hashed")
     db.add_all([paciente, medico])
     db.commit()
 

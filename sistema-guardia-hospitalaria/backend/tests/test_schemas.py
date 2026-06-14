@@ -61,23 +61,23 @@ def test_paciente_response_desde_orm(db):
 
 
 def test_medico_create_campos_requeridos():
-    m = MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999")
+    m = MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999", username="drgarcia", password="clave")
     assert m.especialidad is None
 
 
 def test_medico_create_con_especialidad():
-    m = MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999", especialidad="Cardiología")
+    m = MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999", especialidad="Cardiología", username="drgarcia", password="clave")
     assert m.especialidad == "Cardiología"
 
 
 def test_medico_response_tiene_id():
-    m = MedicoResponse(id=5, nombre="Ana", apellido="García", matricula="MP99999")
+    m = MedicoResponse(id=5, nombre="Ana", apellido="García", matricula="MP99999", username="drgarcia")
     assert m.id == 5
 
 
 def test_medico_response_desde_orm(db):
     from models.medico import Medico
-    medico = Medico(nombre="Roberto", apellido="Silva", matricula="MP77777", especialidad="Traumatología")
+    medico = Medico(nombre="Roberto", apellido="Silva", matricula="MP77777", especialidad="Traumatología", username="drsilva", password_hash="hashed")
     db.add(medico)
     db.commit()
     db.refresh(medico)

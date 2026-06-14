@@ -3,12 +3,16 @@ MEDICO_DATA = {
     "apellido": "López",
     "matricula": "MN12345",
     "especialidad": "Clínica Médica",
+    "username": "drlopez",
+    "password": "secreto123",
 }
 
 MEDICO_SIN_ESPECIALIDAD = {
     "nombre": "Ana",
     "apellido": "Martínez",
     "matricula": "MN67890",
+    "username": "drmartinez",
+    "password": "secreto123",
 }
 
 
