@@ -2,6 +2,7 @@ from datetime import date
 from sqlalchemy.exc import IntegrityError
 import pytest
 from models.paciente import Paciente
+from models.medico import Medico
 
 
 def test_crear_paciente(db):
@@ -41,3 +42,35 @@ def test_paciente_telefono_opcional(db):
     db.commit()
     db.refresh(paciente)
     assert paciente.telefono is None
+
+
+def test_crear_medico(db):
+    medico = Medico(
+        nombre="María",
+        apellido="López",
+        matricula="MP12345",
+        especialidad="Clínica Médica",
+    )
+    db.add(medico)
+    db.commit()
+    db.refresh(medico)
+    assert medico.id is not None
+    assert medico.matricula == "MP12345"
+
+
+def test_matricula_unica(db):
+    m1 = Medico(nombre="Ana", apellido="García", matricula="MP99999")
+    m2 = Medico(nombre="Luis", apellido="Ruiz", matricula="MP99999")
+    db.add(m1)
+    db.commit()
+    db.add(m2)
+    with pytest.raises(IntegrityError):
+        db.commit()
+
+
+def test_medico_especialidad_opcional(db):
+    medico = Medico(nombre="Pedro", apellido="Sosa", matricula="MP00001")
+    db.add(medico)
+    db.commit()
+    db.refresh(medico)
+    assert medico.especialidad is None
