@@ -1,7 +1,9 @@
 from typing import List
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from models.medico import Medico
-from schemas.medico import MedicoCreate
+from models.ingreso_guardia import IngresoGuardia, EstadoIngreso
+from schemas.medico import MedicoCreate, MedicoConCargaResponse
 from security import hash_password
 
 
@@ -21,3 +23,32 @@ def crear_medico(db: Session, data: MedicoCreate) -> Medico:
 
 def obtener_medicos(db: Session) -> List[Medico]:
     return db.query(Medico).all()
+
+
+def obtener_medicos_con_carga(
+    db: Session, estado: EstadoIngreso = EstadoIngreso.EN_ESPERA
+) -> List[MedicoConCargaResponse]:
+    medicos = db.query(Medico).all()
+    result = []
+    for m in medicos:
+        count = (
+            db.query(func.count(IngresoGuardia.id))
+            .filter(
+                IngresoGuardia.medico_id == m.id,
+                IngresoGuardia.estado == estado,
+            )
+            .scalar()
+            or 0
+        )
+        result.append(
+            MedicoConCargaResponse(
+                id=m.id,
+                nombre=m.nombre,
+                apellido=m.apellido,
+                matricula=m.matricula,
+                especialidad=m.especialidad,
+                username=m.username,
+                pacientes_en_espera=count,
+            )
+        )
+    return result

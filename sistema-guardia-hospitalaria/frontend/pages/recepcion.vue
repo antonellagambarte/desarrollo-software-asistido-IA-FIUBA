@@ -82,8 +82,12 @@ function onPacienteCreado(paciente) {
   mostrarExito('Paciente registrado correctamente.')
 }
 
-async function onIngresoCreado() {
-  mostrarExito('Ingreso registrado correctamente.')
+async function onIngresoCreado(ingreso, advertencia) {
+  if (advertencia) {
+    mostrarError(advertencia)
+  } else {
+    mostrarExito('Ingreso registrado correctamente.')
+  }
   limpiarEstado()
   await tablaRef.value?.recargar()
 }

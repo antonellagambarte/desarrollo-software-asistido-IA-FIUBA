@@ -6,6 +6,12 @@ export async function listarMedicos() {
   return res.json()
 }
 
+export async function listarMedicosConCarga(estado = 'EN_ESPERA') {
+  const res = await fetch(`${BASE}/medicos/con-carga?estado=${estado}`)
+  if (!res.ok) throw new Error('Error al obtener médicos con carga')
+  return res.json()
+}
+
 export async function crearMedico(data) {
   const res = await fetch(`${BASE}/medicos/`, {
     method: 'POST',

@@ -19,3 +19,7 @@ class MedicoResponse(BaseModel):
     matricula: str
     especialidad: str
     username: str
+
+
+class MedicoConCargaResponse(MedicoResponse):
+    pacientes_en_espera: int
