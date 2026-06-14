@@ -49,6 +49,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { listarIngresos } from '~/services/ingresoService'
 
+const props = defineProps({
+  busqueda: { type: String, default: '' },
+})
+
 const emit = defineEmits(['error'])
 
 const rootRef = ref(null)
@@ -67,8 +71,17 @@ const headers = [
 
 const ingresosFiltrados = computed(() => {
   const activos = ingresos.value.filter((i) => i.estado !== 'ALTA')
-  if (filtro.value === 'todos') return activos
-  return activos.filter((i) => i.estado === filtro.value)
+  let filtrados = filtro.value === 'todos' ? activos : activos.filter((i) => i.estado === filtro.value)
+  if (props.busqueda.trim()) {
+    const term = props.busqueda.trim().toLowerCase()
+    filtrados = filtrados.filter(
+      (i) =>
+        i.paciente.nombre.toLowerCase().includes(term) ||
+        i.paciente.apellido.toLowerCase().includes(term) ||
+        i.paciente.dni.toLowerCase().includes(term),
+    )
+  }
+  return filtrados
 })
 
 function colorPrioridad(p) {
