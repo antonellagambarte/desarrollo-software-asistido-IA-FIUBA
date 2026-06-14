@@ -176,7 +176,7 @@ Tabla Vuetify `v-data-table` con:
 
 **Dialog Tomar:** confirmación simple. Al confirmar: llama `asignarMedico(ingresoId, medicoId)` y luego `cambiarEstado(ingresoId, 'EN_ATENCION')`. Recarga la tabla. Emite `@error` si falla.
 
-**Dialog Alta:** confirmación con textarea pre-llenada con observaciones actuales (editable). Al confirmar: si el texto de observaciones cambió, llama `actualizarObservaciones()` primero; luego llama `cambiarEstado(ingresoId, 'ALTA')`. Recarga la tabla.
+**Dialog Alta:** confirmación con textarea pre-llenada con observaciones actuales (editable). Al confirmar: siempre llama `actualizarObservaciones(ingresoId, texto)` primero (incluso si el texto no cambió), luego llama `cambiarEstado(ingresoId, 'ALTA')`. Recarga la tabla.
 
 **Dialog Observaciones:** textarea con contenido actual. Al guardar: llama `actualizarObservaciones(ingresoId, texto)`. Muestra snackbar de éxito. Recarga la tabla.
 
