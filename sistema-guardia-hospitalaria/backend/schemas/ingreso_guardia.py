@@ -12,6 +12,14 @@ class IngresoGuardiaCreate(BaseModel):
     observaciones: Optional[str] = None
 
 
+class CambioEstadoRequest(BaseModel):
+    estado: EstadoIngreso
+
+
+class AsignacionMedicoRequest(BaseModel):
+    medico_id: int
+
+
 class IngresoGuardiaResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
