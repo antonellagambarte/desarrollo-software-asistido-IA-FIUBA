@@ -32,3 +32,7 @@ class IngresoGuardiaResponse(BaseModel):
     observaciones: Optional[str] = None
     paciente: PacienteResponse
     medico: Optional[MedicoResponse] = None
+
+
+class ActualizarObservacionesRequest(BaseModel):
+    observaciones: Optional[str] = None
