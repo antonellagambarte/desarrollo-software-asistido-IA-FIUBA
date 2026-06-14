@@ -1,19 +1,11 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from dependencies import get_db
 from schemas.paciente import PacienteCreate, PacienteResponse
 from services import paciente as paciente_service
 
 router = APIRouter(prefix="/pacientes", tags=["pacientes"])
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/", response_model=PacienteResponse, status_code=status.HTTP_201_CREATED)

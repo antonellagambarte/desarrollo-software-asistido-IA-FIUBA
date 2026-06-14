@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from database import Base
 from main import app
-from routers.paciente import get_db
+from dependencies import get_db
 
 
 @pytest.fixture

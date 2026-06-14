@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 import models  # noqa: F401 — registers all models so create_all includes all tables
 from routers.paciente import router as paciente_router
+from routers.medico import router as medico_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -16,6 +17,7 @@ app.add_middleware(
 )
 
 app.include_router(paciente_router)
+app.include_router(medico_router)
 
 
 @app.get("/")
