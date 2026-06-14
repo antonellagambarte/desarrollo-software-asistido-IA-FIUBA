@@ -62,8 +62,8 @@ def test_crear_medico(db):
 
 
 def test_matricula_unica(db):
-    m1 = Medico(nombre="Ana", apellido="García", matricula="MP99999", username="drgarcia1", password_hash="h1")
-    m2 = Medico(nombre="Luis", apellido="Ruiz", matricula="MP99999", username="drruiz1", password_hash="h2")
+    m1 = Medico(nombre="Ana", apellido="García", matricula="MP99999", especialidad="Clínica", username="drgarcia1", password_hash="h1")
+    m2 = Medico(nombre="Luis", apellido="Ruiz", matricula="MP99999", especialidad="Clínica", username="drruiz1", password_hash="h2")
     db.add(m1)
     db.commit()
     db.add(m2)
@@ -71,12 +71,11 @@ def test_matricula_unica(db):
         db.commit()
 
 
-def test_medico_especialidad_opcional(db):
+def test_especialidad_requerida(db):
     medico = Medico(nombre="Pedro", apellido="Sosa", matricula="MP00001", username="drsosa", password_hash="hashed")
     db.add(medico)
-    db.commit()
-    db.refresh(medico)
-    assert medico.especialidad is None
+    with pytest.raises(IntegrityError):
+        db.commit()
 
 
 def test_crear_ingreso_estado_inicial(db):
@@ -111,7 +110,7 @@ def test_ingreso_relacion_paciente(db):
 
 def test_ingreso_con_medico(db):
     paciente = Paciente(dni="55555555", nombre="Martín", apellido="Ríos", fecha_nacimiento=date(1970, 11, 5))
-    medico = Medico(nombre="Rosa", apellido="Flores", matricula="MP55555", username="drflores", password_hash="hashed")
+    medico = Medico(nombre="Rosa", apellido="Flores", matricula="MP55555", especialidad="Guardia", username="drflores", password_hash="hashed")
     db.add_all([paciente, medico])
     db.commit()
 

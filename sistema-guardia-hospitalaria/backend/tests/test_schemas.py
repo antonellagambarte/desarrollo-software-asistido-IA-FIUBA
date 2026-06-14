@@ -1,4 +1,6 @@
+import pytest
 from datetime import date, datetime, timezone
+from pydantic import ValidationError
 from schemas.paciente import PacienteCreate, PacienteResponse
 from schemas.medico import MedicoCreate, MedicoResponse
 
@@ -60,24 +62,30 @@ def test_paciente_response_desde_orm(db):
     assert response.edad >= 0
 
 
-def test_medico_create_campos_requeridos():
-    m = MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999", username="drgarcia", password="clave")
-    assert m.especialidad is None
+def test_medico_create_especialidad_requerida():
+    with pytest.raises(ValidationError):
+        MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999", username="drgarcia", password="clave")
 
 
 def test_medico_create_con_especialidad():
-    m = MedicoCreate(nombre="Ana", apellido="García", matricula="MP99999", especialidad="Cardiología", username="drgarcia", password="clave")
+    m = MedicoCreate(
+        nombre="Ana", apellido="García", matricula="MP99999",
+        especialidad="Cardiología", username="drgarcia", password="clave",
+    )
     assert m.especialidad == "Cardiología"
 
 
 def test_medico_response_tiene_id():
-    m = MedicoResponse(id=5, nombre="Ana", apellido="García", matricula="MP99999", username="drgarcia")
+    m = MedicoResponse(id=5, nombre="Ana", apellido="García", matricula="MP99999", especialidad="Clínica", username="drgarcia")
     assert m.id == 5
 
 
 def test_medico_response_desde_orm(db):
     from models.medico import Medico
-    medico = Medico(nombre="Roberto", apellido="Silva", matricula="MP77777", especialidad="Traumatología", username="drsilva", password_hash="hashed")
+    medico = Medico(
+        nombre="Roberto", apellido="Silva", matricula="MP77777",
+        especialidad="Traumatología", username="drsilva", password_hash="hashed",
+    )
     db.add(medico)
     db.commit()
     db.refresh(medico)

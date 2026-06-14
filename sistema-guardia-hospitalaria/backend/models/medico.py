@@ -10,7 +10,7 @@ class Medico(Base):
     nombre = Column(String, nullable=False)
     apellido = Column(String, nullable=False)
     matricula = Column(String, unique=True, nullable=False)
-    especialidad = Column(String, nullable=True)
+    especialidad = Column(String, nullable=False)
     username = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
 
