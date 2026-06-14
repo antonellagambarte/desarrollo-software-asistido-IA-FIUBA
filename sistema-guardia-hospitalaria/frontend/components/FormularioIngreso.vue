@@ -41,7 +41,6 @@
         </v-row>
 
         <v-alert v-if="error" type="error" variant="tonal" class="mb-4">{{ error }}</v-alert>
-        <v-alert v-if="advertencia" type="warning" variant="tonal" class="mb-4">{{ advertencia }}</v-alert>
 
         <v-btn type="submit" color="primary" variant="flat" :loading="cargando">
           Registrar ingreso
@@ -66,7 +65,6 @@ const formRef = ref(null)
 const cargando = ref(false)
 const cargandoMedicos = ref(false)
 const error = ref('')
-const advertencia = ref('')
 const prioridad = ref(null)
 const observaciones = ref('')
 const medicoId = ref(null)
@@ -106,7 +104,6 @@ async function guardar() {
 
   cargando.value = true
   error.value = ''
-  advertencia.value = ''
 
   try {
     const data = {
@@ -116,16 +113,16 @@ async function guardar() {
     }
     const ingreso = await crearIngreso(data)
 
+    let advertencia = null
     if (medicoId.value) {
       try {
         await asignarMedico(ingreso.id, medicoId.value)
       } catch {
-        advertencia.value =
-          'Ingreso registrado, pero no se pudo asignar el médico. Podés asignarlo desde la tabla.'
+        advertencia = 'Ingreso registrado, pero no se pudo asignar el médico. Podés asignarlo desde la tabla.'
       }
     }
 
-    emit('ingreso-creado', ingreso)
+    emit('ingreso-creado', ingreso, advertencia)
   } catch (e) {
     error.value = e?.message || 'Error inesperado'
   } finally {
