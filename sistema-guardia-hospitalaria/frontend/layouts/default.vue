@@ -15,7 +15,8 @@
           :title="item.label"
           rounded="lg"
           base-color="white"
-          @click="item.onClick"
+          :to="item.to || undefined"
+          @click="item.onClick && item.onClick()"
         />
       </v-list>
     </v-navigation-drawer>
