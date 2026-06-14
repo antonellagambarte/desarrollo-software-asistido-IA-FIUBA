@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 
@@ -6,7 +5,7 @@ class MedicoCreate(BaseModel):
     nombre: str
     apellido: str
     matricula: str
-    especialidad: Optional[str] = None
+    especialidad: str
     username: str
     password: str
 
@@ -18,5 +17,5 @@ class MedicoResponse(BaseModel):
     nombre: str
     apellido: str
     matricula: str
-    especialidad: Optional[str] = None
+    especialidad: str
     username: str

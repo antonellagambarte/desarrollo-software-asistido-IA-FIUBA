@@ -7,10 +7,11 @@ MEDICO_DATA = {
     "password": "secreto123",
 }
 
-MEDICO_SIN_ESPECIALIDAD = {
+MEDICO_DATA_2 = {
     "nombre": "Ana",
     "apellido": "Martínez",
     "matricula": "MN67890",
+    "especialidad": "Guardia",
     "username": "drmartinez",
     "password": "secreto123",
 }
@@ -31,10 +32,10 @@ def test_crear_medico_retorna_datos(client):
     assert "id" in data
 
 
-def test_crear_medico_sin_especialidad(client):
-    response = client.post("/medicos/", json=MEDICO_SIN_ESPECIALIDAD)
-    assert response.status_code == 201
-    assert response.json()["especialidad"] is None
+def test_crear_medico_sin_especialidad_retorna_422(client):
+    data = {k: v for k, v in MEDICO_DATA.items() if k != "especialidad"}
+    response = client.post("/medicos/", json=data)
+    assert response.status_code == 422
 
 
 def test_crear_medico_matricula_duplicada_retorna_409(client):
@@ -51,7 +52,7 @@ def test_listar_medicos_lista_vacia(client):
 
 def test_listar_medicos_retorna_todos(client):
     client.post("/medicos/", json=MEDICO_DATA)
-    client.post("/medicos/", json=MEDICO_SIN_ESPECIALIDAD)
+    client.post("/medicos/", json=MEDICO_DATA_2)
     response = client.get("/medicos/")
     assert response.status_code == 200
     assert len(response.json()) == 2
