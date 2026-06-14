@@ -1,4 +1,5 @@
 {
+  "permissionMode": "plan",
   "permissions": {
     "allow": [
       "Read",
