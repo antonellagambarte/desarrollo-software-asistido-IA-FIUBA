@@ -203,11 +203,11 @@ async function confirmarTomar() {
     await asignarMedico(ingresoSeleccionado.value.id, props.medicoId)
     await cambiarEstado(ingresoSeleccionado.value.id, 'EN_ATENCION')
     dialogTomar.value = false
-    await cargarIngresos()
   } catch {
     emit('error', 'Error al tomar el paciente.')
   } finally {
     procesando.value = false
+    await cargarIngresos()
   }
 }
 
@@ -217,11 +217,11 @@ async function confirmarAlta() {
     await actualizarObservaciones(ingresoSeleccionado.value.id, textoAltaObs.value || null)
     await cambiarEstado(ingresoSeleccionado.value.id, 'ALTA')
     dialogAlta.value = false
-    await cargarIngresos()
   } catch {
     emit('error', 'Error al dar el alta.')
   } finally {
     procesando.value = false
+    await cargarIngresos()
   }
 }
 
