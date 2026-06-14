@@ -25,7 +25,7 @@
               variant="outlined"
               clearable
               :loading="cargandoMedicos"
-              :disabled="cargandoMedicos || opcionesMedicos.length === 0"
+              :disabled="cargandoMedicos || errorCargaMedicos || opcionesMedicos.length === 0"
               :hint="hintMedicos"
               persistent-hint
             />
