@@ -65,3 +65,47 @@ def test_obtener_paciente_por_dni(client):
 def test_obtener_paciente_por_dni_no_encontrado(client):
     response = client.get("/pacientes/00000000")
     assert response.status_code == 404
+
+
+def test_buscar_pacientes_por_nombre(client):
+    client.post("/pacientes/", json=PACIENTE_DATA)          # Juan Pérez
+    client.post("/pacientes/", json=PACIENTE_SIN_TELEFONO)  # María García
+    response = client.get("/pacientes/?q=juan")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["nombre"] == "Juan"
+
+
+def test_buscar_pacientes_por_apellido(client):
+    client.post("/pacientes/", json=PACIENTE_DATA)
+    client.post("/pacientes/", json=PACIENTE_SIN_TELEFONO)
+    response = client.get("/pacientes/?q=garc")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["apellido"] == "García"
+
+
+def test_buscar_pacientes_por_dni_parcial(client):
+    client.post("/pacientes/", json=PACIENTE_DATA)          # DNI 12345678
+    client.post("/pacientes/", json=PACIENTE_SIN_TELEFONO)  # DNI 87654321
+    response = client.get("/pacientes/?q=1234")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["dni"] == "12345678"
+
+
+def test_buscar_pacientes_sin_resultados(client):
+    client.post("/pacientes/", json=PACIENTE_DATA)
+    response = client.get("/pacientes/?q=xyz_no_existe")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_buscar_pacientes_q_vacio_retorna_lista_vacia(client):
+    client.post("/pacientes/", json=PACIENTE_DATA)
+    response = client.get("/pacientes/?q=")
+    assert response.status_code == 200
+    assert response.json() == []

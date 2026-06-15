@@ -17,3 +17,9 @@ export async function crearPaciente(data) {
   if (!res.ok) throw new Error('Error al registrar paciente')
   return res.json()
 }
+
+export async function buscarPacientes(q) {
+  const res = await fetch(`${BASE}/pacientes/?q=${encodeURIComponent(q)}`)
+  if (!res.ok) throw new Error('Error al buscar pacientes')
+  return res.json()
+}
