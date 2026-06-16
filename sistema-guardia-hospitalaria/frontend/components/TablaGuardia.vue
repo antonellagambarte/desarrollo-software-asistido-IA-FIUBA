@@ -77,6 +77,7 @@ function colorPrioridad(p) {
 }
 
 function formatFecha(iso) {
+  if (!iso) return '—'
   const d = new Date(iso)
   const dd = String(d.getDate()).padStart(2, '0')
   const mm = String(d.getMonth() + 1).padStart(2, '0')
@@ -102,13 +103,26 @@ function abrirDialogTomar(ingreso) {
 }
 
 async function confirmarTomar() {
+  if (!authStore.medico) {
+    emit('error', 'No hay médico en sesión.')
+    return
+  }
   procesando.value = true
+  const id = ingresoSeleccionado.value.id
+  let medicoAsignado = false
   try {
-    await asignarMedico(ingresoSeleccionado.value.id, authStore.medico.id)
-    await cambiarEstado(ingresoSeleccionado.value.id, 'EN_ATENCION')
+    await asignarMedico(id, authStore.medico.id)
+    medicoAsignado = true
+    await cambiarEstado(id, 'EN_ATENCION')
     dialogTomar.value = false
+    ingresoSeleccionado.value = null
   } catch {
-    emit('error', 'Error al tomar el paciente.')
+    if (medicoAsignado) {
+      emit('error', 'El médico fue asignado pero no se pudo cambiar el estado. Recargue y verifique.')
+    } else {
+      emit('error', 'Error al tomar el paciente.')
+    }
+    dialogTomar.value = false
   } finally {
     procesando.value = false
     await cargarIngresos()
