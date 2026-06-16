@@ -140,3 +140,49 @@ def test_asignar_medico_ingreso_inexistente_retorna_404(client, medico_id):
 def test_asignar_medico_inexistente_retorna_404(client, ingreso_id):
     response = client.patch(f"/ingresos/{ingreso_id}/medico", json={"medico_id": 9999})
     assert response.status_code == 404
+
+
+# --- PATCH /ingresos/{id}/observaciones-medico ---
+
+def test_actualizar_observaciones_medico_ok(client, ingreso_id):
+    client.patch(f"/ingresos/{ingreso_id}/estado", json={"estado": "EN_ATENCION"})
+    response = client.patch(
+        f"/ingresos/{ingreso_id}/observaciones-medico",
+        json={"observaciones_medico": "Paciente con fiebre alta"},
+    )
+    assert response.status_code == 200
+    assert response.json()["observaciones_medico"] == "Paciente con fiebre alta"
+
+
+def test_actualizar_observaciones_medico_no_modifica_observaciones_recepcion(client, paciente_id):
+    ingreso = client.post(
+        "/ingresos/",
+        json={"paciente_id": paciente_id, "prioridad": "ALTA", "observaciones": "Dolor en el pecho"},
+    ).json()
+    client.patch(f"/ingresos/{ingreso['id']}/estado", json={"estado": "EN_ATENCION"})
+    client.patch(
+        f"/ingresos/{ingreso['id']}/observaciones-medico",
+        json={"observaciones_medico": "Presión alta"},
+    )
+    data = client.get("/ingresos/").json()
+    actualizado = next(i for i in data if i["id"] == ingreso["id"])
+    assert actualizado["observaciones"] == "Dolor en el pecho"
+    assert actualizado["observaciones_medico"] == "Presión alta"
+
+
+def test_actualizar_observaciones_medico_en_alta_retorna_400(client, ingreso_id):
+    client.patch(f"/ingresos/{ingreso_id}/estado", json={"estado": "EN_ATENCION"})
+    client.patch(f"/ingresos/{ingreso_id}/estado", json={"estado": "ALTA"})
+    response = client.patch(
+        f"/ingresos/{ingreso_id}/observaciones-medico",
+        json={"observaciones_medico": "Obs tardía"},
+    )
+    assert response.status_code == 400
+
+
+def test_actualizar_observaciones_medico_ingreso_inexistente_retorna_404(client):
+    response = client.patch(
+        "/ingresos/9999/observaciones-medico",
+        json={"observaciones_medico": "Obs"},
+    )
+    assert response.status_code == 404

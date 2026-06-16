@@ -12,11 +12,20 @@
         {{ ingreso?.paciente?.apellido }}, {{ ingreso?.paciente?.nombre }}
       </v-card-subtitle>
       <v-card-text class="pt-2">
+        <div class="text-caption text-medium-emphasis mb-1">Observaciones de recepción</div>
+        <div
+          class="text-body-2 mb-4 pa-3 rounded"
+          style="min-height: 48px; background: rgba(var(--v-theme-surface-variant), 1)"
+        >
+          {{ ingreso?.observaciones || 'Sin observaciones de recepción' }}
+        </div>
+
+        <div class="text-caption text-medium-emphasis mb-1">Observaciones del médico</div>
         <v-textarea
-          v-model="texto"
+          v-model="textoMedico"
           variant="outlined"
           rows="4"
-          placeholder="Escribí las observaciones del paciente..."
+          placeholder="Escribí tus observaciones..."
           hide-details
         />
       </v-card-text>
@@ -31,7 +40,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { actualizarObservaciones } from '~/services/ingresoService'
+import { actualizarObservacionesMedico } from '~/services/ingresoService'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -40,13 +49,13 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'guardado', 'error'])
 
-const texto = ref('')
+const textoMedico = ref('')
 const guardando = ref(false)
 
 watch(
   () => props.modelValue,
   (val) => {
-    if (val) texto.value = props.ingreso?.observaciones ?? ''
+    if (val) textoMedico.value = props.ingreso?.observaciones_medico ?? ''
   },
 )
 
@@ -58,7 +67,7 @@ async function guardar() {
   if (!props.ingreso) return
   guardando.value = true
   try {
-    await actualizarObservaciones(props.ingreso.id, texto.value || null)
+    await actualizarObservacionesMedico(props.ingreso.id, textoMedico.value || null)
     emit('guardado')
     cerrar()
   } catch (e) {

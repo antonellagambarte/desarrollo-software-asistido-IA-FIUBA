@@ -9,7 +9,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function cargarSesion() {
     if (!process.client) return
-    const stored = localStorage.getItem('medico_sesion')
+    const stored = sessionStorage.getItem('medico_sesion')
     if (stored) {
       try {
         medico.value = JSON.parse(stored)
@@ -22,12 +22,12 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(username, password) {
     const data = await loginService(username, password)
     medico.value = data
-    localStorage.setItem('medico_sesion', JSON.stringify(data))
+    sessionStorage.setItem('medico_sesion', JSON.stringify(data))
   }
 
   function logout() {
     medico.value = null
-    localStorage.removeItem('medico_sesion')
+    sessionStorage.removeItem('medico_sesion')
   }
 
   return { medico, estaLogueado, cargarSesion, login, logout }
