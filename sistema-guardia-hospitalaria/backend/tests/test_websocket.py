@@ -64,3 +64,59 @@ def test_broadcast_elimina_conexion_caida():
 def test_broadcast_con_lista_vacia_no_falla():
     manager = ConnectionManager()
     asyncio.run(manager.broadcast({"tipo": "actualizacion"}))
+
+
+import pytest
+
+
+@pytest.fixture
+def paciente_id(client):
+    resp = client.post("/pacientes/", json=PACIENTE_DATA)
+    return resp.json()["id"]
+
+
+@pytest.fixture
+def medico_id(client):
+    resp = client.post("/medicos/", json=MEDICO_DATA)
+    return resp.json()["id"]
+
+
+@pytest.fixture
+def ingreso_id(client, paciente_id):
+    resp = client.post("/ingresos/", json={"paciente_id": paciente_id, "prioridad": "BAJA"})
+    return resp.json()["id"]
+
+
+def test_websocket_acepta_conexion(client):
+    with client.websocket_connect("/ws") as ws:
+        pass
+
+
+def test_broadcast_al_crear_ingreso(client, paciente_id):
+    with client.websocket_connect("/ws") as ws:
+        client.post("/ingresos/", json={"paciente_id": paciente_id, "prioridad": "MEDIA"})
+        data = ws.receive_json()
+        assert data == {"tipo": "actualizacion"}
+
+
+def test_broadcast_al_cambiar_estado(client, ingreso_id):
+    with client.websocket_connect("/ws") as ws:
+        client.patch(f"/ingresos/{ingreso_id}/estado", json={"estado": "EN_ATENCION"})
+        data = ws.receive_json()
+        assert data == {"tipo": "actualizacion"}
+
+
+def test_broadcast_al_asignar_medico(client, ingreso_id, medico_id):
+    with client.websocket_connect("/ws") as ws:
+        client.patch(f"/ingresos/{ingreso_id}/medico", json={"medico_id": medico_id})
+        data = ws.receive_json()
+        assert data == {"tipo": "actualizacion"}
+
+
+def test_sin_broadcast_al_actualizar_observaciones(client, ingreso_id):
+    client.patch(f"/ingresos/{ingreso_id}/estado", json={"estado": "EN_ATENCION"})
+    response = client.patch(
+        f"/ingresos/{ingreso_id}/observaciones",
+        json={"observaciones": "Sin novedad"},
+    )
+    assert response.status_code == 200
