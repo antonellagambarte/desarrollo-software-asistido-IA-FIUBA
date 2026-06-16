@@ -121,3 +121,14 @@ def test_sin_broadcast_al_actualizar_observaciones(client, ingreso_id):
         )
         assert response.status_code == 200
         mock_broadcast.assert_not_called()
+
+
+def test_sin_broadcast_al_actualizar_observaciones_medico(client, ingreso_id):
+    client.patch(f"/ingresos/{ingreso_id}/estado", json={"estado": "EN_ATENCION"})
+    with patch.object(ws.connection_manager.manager, "broadcast", new_callable=AsyncMock) as mock_broadcast:
+        response = client.patch(
+            f"/ingresos/{ingreso_id}/observaciones-medico",
+            json={"observaciones_medico": "Paciente estable"},
+        )
+        assert response.status_code == 200
+        mock_broadcast.assert_not_called()
