@@ -1,5 +1,7 @@
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+import pytest
+import ws.connection_manager
+from unittest.mock import AsyncMock, MagicMock, patch
 from ws.connection_manager import ConnectionManager
 
 PACIENTE_DATA = {
@@ -66,9 +68,6 @@ def test_broadcast_con_lista_vacia_no_falla():
     asyncio.run(manager.broadcast({"tipo": "actualizacion"}))
 
 
-import pytest
-
-
 @pytest.fixture
 def paciente_id(client):
     resp = client.post("/pacientes/", json=PACIENTE_DATA)
@@ -115,8 +114,10 @@ def test_broadcast_al_asignar_medico(client, ingreso_id, medico_id):
 
 def test_sin_broadcast_al_actualizar_observaciones(client, ingreso_id):
     client.patch(f"/ingresos/{ingreso_id}/estado", json={"estado": "EN_ATENCION"})
-    response = client.patch(
-        f"/ingresos/{ingreso_id}/observaciones",
-        json={"observaciones": "Sin novedad"},
-    )
-    assert response.status_code == 200
+    with patch.object(ws.connection_manager.manager, "broadcast", new_callable=AsyncMock) as mock_broadcast:
+        response = client.patch(
+            f"/ingresos/{ingreso_id}/observaciones",
+            json={"observaciones": "Sin novedad"},
+        )
+        assert response.status_code == 200
+        mock_broadcast.assert_not_called()
