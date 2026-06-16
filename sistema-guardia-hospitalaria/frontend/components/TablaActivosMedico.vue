@@ -8,7 +8,7 @@
         :items="ingresosFiltrados"
         item-value="id"
         :loading="cargando"
-        no-data-text="No tenés pacientes en atención"
+        no-data-text="No tenés pacientes asignados"
         density="compact"
       >
         <template #item.paciente_nombre="{ item }">
@@ -24,6 +24,15 @@
         </template>
         <template #item.fecha_ingreso="{ item }">
           {{ formatFecha(item.fecha_ingreso) }}
+        </template>
+        <template #item.estado="{ item }">
+          <v-chip
+            :color="colorEstado(item.estado)"
+            size="small"
+            variant="tonal"
+          >
+            {{ item.estado === 'EN_ESPERA' ? 'En espera' : 'En atención' }}
+          </v-chip>
         </template>
         <template #item.acciones="{ item }">
           <div class="d-flex ga-2">
@@ -89,19 +98,24 @@ const dialogAlta = ref(false)
 const textoAlta = ref('')
 
 const ingresosFiltrados = computed(() =>
-  ingresos.value.filter((i) => i.medico_id === props.medicoId),
+  ingresos.value.filter((i) => i.medico_id === props.medicoId && i.estado !== 'ALTA'),
 )
 
 const headers = [
   { title: 'Paciente', key: 'paciente_nombre', sortable: false },
   { title: 'DNI', key: 'paciente_dni', sortable: false },
   { title: 'Prioridad', key: 'prioridad', sortable: false },
+  { title: 'Estado', key: 'estado', sortable: false },
   { title: 'Ingreso', key: 'fecha_ingreso', sortable: false },
   { title: 'Acciones', key: 'acciones', sortable: false },
 ]
 
 function colorPrioridad(p) {
   return { BAJA: 'success', MEDIA: 'warning', ALTA: 'error' }[p] ?? 'grey'
+}
+
+function colorEstado(e) {
+  return { EN_ESPERA: 'warning', EN_ATENCION: 'primary' }[e] ?? 'grey'
 }
 
 function formatFecha(iso) {
@@ -117,7 +131,7 @@ function formatFecha(iso) {
 async function cargarIngresos() {
   cargando.value = true
   try {
-    ingresos.value = await listarIngresos('EN_ATENCION')
+    ingresos.value = await listarIngresos()
   } catch {
     emit('error', 'Error al cargar pacientes.')
   } finally {
