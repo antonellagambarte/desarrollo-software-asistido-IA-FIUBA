@@ -30,9 +30,14 @@ class IngresoGuardiaResponse(BaseModel):
     prioridad: Prioridad
     fecha_ingreso: datetime
     observaciones: Optional[str] = None
+    observaciones_medico: Optional[str] = None
     paciente: PacienteResponse
     medico: Optional[MedicoResponse] = None
 
 
 class ActualizarObservacionesRequest(BaseModel):
     observaciones: Optional[str] = None
+
+
+class ActualizarObservacionesMedicoRequest(BaseModel):
+    observaciones_medico: Optional[str] = None

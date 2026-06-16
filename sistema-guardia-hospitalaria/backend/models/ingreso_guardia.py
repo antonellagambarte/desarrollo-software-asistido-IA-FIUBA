@@ -27,6 +27,7 @@ class IngresoGuardia(Base):
     prioridad = Column(SAEnum(Prioridad), nullable=False)
     fecha_ingreso = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     observaciones = Column(Text, nullable=True)
+    observaciones_medico = Column(Text, nullable=True)
 
     paciente = relationship("Paciente", back_populates="ingresos")
     medico = relationship("Medico", back_populates="ingresos")
