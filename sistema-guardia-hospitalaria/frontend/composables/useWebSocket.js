@@ -12,7 +12,7 @@ export function useWebSocket(onMessage) {
     ws.onmessage = () => onMessage()
 
     ws.onclose = () => {
-      reconnectTimeout = setTimeout(connect, 3000)
+      if (!destroyed) reconnectTimeout = setTimeout(connect, 3000)
     }
 
     ws.onerror = () => {
