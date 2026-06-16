@@ -9,6 +9,7 @@ from schemas.medico import MedicoResponse
 class IngresoGuardiaCreate(BaseModel):
     paciente_id: int
     prioridad: Prioridad
+    especialidad_requerida: Optional[str] = None
     observaciones: Optional[str] = None
 
 
@@ -29,6 +30,7 @@ class IngresoGuardiaResponse(BaseModel):
     estado: EstadoIngreso
     prioridad: Prioridad
     fecha_ingreso: datetime
+    especialidad_requerida: Optional[str] = None
     observaciones: Optional[str] = None
     observaciones_medico: Optional[str] = None
     paciente: PacienteResponse

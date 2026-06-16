@@ -29,8 +29,9 @@
         />
       </v-col>
       <v-col cols="12" sm="6">
-        <v-text-field
+        <v-select
           v-model="form.especialidad"
+          :items="ESPECIALIDADES"
           label="Especialidad"
           :rules="[requerido]"
           variant="outlined"
@@ -79,6 +80,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { crearMedico } from '~/services/medicoService'
+import { ESPECIALIDADES } from '~/utils/especialidades'
 
 const emit = defineEmits(['medico-creado'])
 

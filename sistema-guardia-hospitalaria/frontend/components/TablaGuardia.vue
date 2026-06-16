@@ -25,6 +25,12 @@
         <template #item.fecha_ingreso="{ item }">
           {{ formatFecha(item.fecha_ingreso) }}
         </template>
+        <template #item.especialidad_requerida="{ item }">
+          <v-chip v-if="item.especialidad_requerida" size="small" variant="tonal" color="info">
+            {{ item.especialidad_requerida }}
+          </v-chip>
+          <span v-else class="text-medium-emphasis text-body-2">—</span>
+        </template>
         <template #item.medico_asignado="{ item }">
           <span v-if="item.medico" class="text-body-2">
             Dr/a. {{ item.medico.apellido }}, {{ item.medico.nombre }}
@@ -95,6 +101,7 @@ const headers = [
   { title: 'Paciente', key: 'paciente_nombre', sortable: false },
   { title: 'DNI', key: 'paciente_dni', sortable: false },
   { title: 'Prioridad', key: 'prioridad', sortable: false },
+  { title: 'Especialidad', key: 'especialidad_requerida', sortable: false },
   { title: 'Médico asignado', key: 'medico_asignado', sortable: false },
   { title: 'Ingreso', key: 'fecha_ingreso', sortable: false },
   { title: 'Acciones', key: 'acciones', sortable: false },

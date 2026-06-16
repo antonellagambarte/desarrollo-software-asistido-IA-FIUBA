@@ -17,6 +17,7 @@ def crear_ingreso(db: Session, data: IngresoGuardiaCreate) -> IngresoGuardia:
     ingreso = IngresoGuardia(
         paciente_id=data.paciente_id,
         prioridad=data.prioridad,
+        especialidad_requerida=data.especialidad_requerida,
         observaciones=data.observaciones,
         estado=EstadoIngreso.EN_ESPERA,
     )
