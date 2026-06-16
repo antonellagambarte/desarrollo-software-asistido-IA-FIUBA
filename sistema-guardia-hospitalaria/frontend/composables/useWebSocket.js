@@ -3,8 +3,10 @@ import { onMounted, onUnmounted } from 'vue'
 export function useWebSocket(onMessage) {
   let ws = null
   let reconnectTimeout = null
+  let destroyed = false
 
   function connect() {
+    if (destroyed) return
     ws = new WebSocket('ws://localhost:8000/ws')
 
     ws.onmessage = () => onMessage()
@@ -21,6 +23,7 @@ export function useWebSocket(onMessage) {
   onMounted(connect)
 
   onUnmounted(() => {
+    destroyed = true
     clearTimeout(reconnectTimeout)
     ws?.close()
   })
