@@ -46,3 +46,13 @@ export async function actualizarObservaciones(ingresoId, observaciones) {
   if (!res.ok) throw new Error('Error al actualizar observaciones')
   return res.json()
 }
+
+export async function actualizarObservacionesMedico(ingresoId, observaciones) {
+  const res = await fetch(`${BASE}/ingresos/${ingresoId}/observaciones-medico`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ observaciones_medico: observaciones || null }),
+  })
+  if (!res.ok) throw new Error('Error al guardar observaciones del médico')
+  return res.json()
+}
