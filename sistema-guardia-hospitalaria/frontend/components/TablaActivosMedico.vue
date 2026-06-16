@@ -26,7 +26,7 @@
           {{ formatFecha(item.fecha_ingreso) }}
         </template>
         <template #item.acciones="{ item }">
-          <div class="d-flex gap-2">
+          <div class="d-flex ga-2">
             <v-btn size="small" color="secondary" variant="tonal" @click="abrirDialogObservaciones(item)">
               Obs.
             </v-btn>
@@ -89,9 +89,7 @@ const dialogAlta = ref(false)
 const textoAlta = ref('')
 
 const ingresosFiltrados = computed(() =>
-  ingresos.value.filter(
-    (i) => i.estado === 'EN_ATENCION' && i.medico_id === props.medicoId,
-  ),
+  ingresos.value.filter((i) => i.medico_id === props.medicoId),
 )
 
 const headers = [
@@ -107,6 +105,7 @@ function colorPrioridad(p) {
 }
 
 function formatFecha(iso) {
+  if (!iso) return '—'
   const d = new Date(iso)
   const dd = String(d.getDate()).padStart(2, '0')
   const mm = String(d.getMonth() + 1).padStart(2, '0')
@@ -118,7 +117,7 @@ function formatFecha(iso) {
 async function cargarIngresos() {
   cargando.value = true
   try {
-    ingresos.value = await listarIngresos()
+    ingresos.value = await listarIngresos('EN_ATENCION')
   } catch {
     emit('error', 'Error al cargar pacientes.')
   } finally {
@@ -143,6 +142,7 @@ async function confirmarAlta() {
     await actualizarObservacionesMedico(ingresoSeleccionado.value.id, textoAlta.value || null)
     await cambiarEstado(ingresoSeleccionado.value.id, 'ALTA')
     dialogAlta.value = false
+    ingresoSeleccionado.value = null
   } catch {
     emit('error', 'Error al dar el alta.')
   } finally {
