@@ -24,7 +24,7 @@ const snackbar = ref({ visible: false, mensaje: '', color: 'error' })
 const SIDEBAR_LINKS = [
   { label: 'Pacientes en guardia', icon: 'mdi-clipboard-list',  to: '/medico/guardia' },
   { label: 'Mis pacientes',        icon: 'mdi-clipboard-pulse', to: '/medico/activos' },
-  { label: 'Cerrar sesión',        icon: 'mdi-logout',          onClick: () => authStore.logout() },
+  { label: 'Cerrar sesión',        icon: 'mdi-logout',          onClick: () => authStore.logout(), footer: true },
 ]
 
 onMounted(() => { items.value = SIDEBAR_LINKS })

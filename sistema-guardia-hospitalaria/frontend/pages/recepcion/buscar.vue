@@ -133,7 +133,7 @@ function cambiarPaciente() {
 }
 
 function irANuevoPaciente() {
-  navigateTo(`/recepcion/nuevo?dni=${encodeURIComponent(query.value)}`)
+  navigateTo('/recepcion/nuevo')
 }
 
 function onIngresoCreado(_ingreso, advertencia) {
