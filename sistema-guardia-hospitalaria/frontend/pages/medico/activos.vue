@@ -1,7 +1,7 @@
 <template>
   <div>
     <TablaActivosMedico
-      :medico-id="authStore.medico.id"
+      :medico-id="authStore.medico?.id"
       @error="mostrarError"
     />
     <v-snackbar
