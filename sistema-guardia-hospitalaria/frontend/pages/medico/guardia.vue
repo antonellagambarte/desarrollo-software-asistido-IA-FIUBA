@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TablaGuardia ref="tablaRef" @error="mostrarError" />
+    <TablaGuardia @error="mostrarError" />
     <v-snackbar
       v-model="snackbar.visible"
       :color="snackbar.color"
@@ -19,7 +19,6 @@ import { useSidebarItems } from '~/composables/useSidebarItems'
 
 const authStore = useAuthStore()
 const { items } = useSidebarItems()
-const tablaRef = ref(null)
 const snackbar = ref({ visible: false, mensaje: '', color: 'error' })
 
 const SIDEBAR_LINKS = [
