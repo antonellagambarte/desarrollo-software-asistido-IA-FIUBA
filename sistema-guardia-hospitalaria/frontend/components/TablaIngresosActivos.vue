@@ -48,6 +48,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { listarIngresos } from '~/services/ingresoService'
+import { useWebSocket } from '~/composables/useWebSocket'
 
 const props = defineProps({
   busqueda: { type: String, default: '' },
@@ -122,4 +123,5 @@ defineExpose({
 })
 
 onMounted(cargarIngresos)
+useWebSocket(cargarIngresos)
 </script>

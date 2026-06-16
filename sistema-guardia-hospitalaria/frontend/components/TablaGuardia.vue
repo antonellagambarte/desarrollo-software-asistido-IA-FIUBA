@@ -75,6 +75,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/authStore'
 import { listarIngresos, cambiarEstado, asignarMedico } from '~/services/ingresoService'
+import { useWebSocket } from '~/composables/useWebSocket'
 
 const emit = defineEmits(['error'])
 const authStore = useAuthStore()
@@ -158,4 +159,5 @@ async function confirmarTomar() {
 
 defineExpose({ recargar: cargarIngresos })
 onMounted(cargarIngresos)
+useWebSocket(cargarIngresos)
 </script>
