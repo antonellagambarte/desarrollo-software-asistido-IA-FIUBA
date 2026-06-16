@@ -25,6 +25,12 @@
         <template #item.fecha_ingreso="{ item }">
           {{ formatFecha(item.fecha_ingreso) }}
         </template>
+        <template #item.medico_asignado="{ item }">
+          <span v-if="item.medico" class="text-body-2">
+            Dr/a. {{ item.medico.apellido }}, {{ item.medico.nombre }}
+          </span>
+          <v-chip v-else size="small" variant="tonal" color="grey">Sin asignar</v-chip>
+        </template>
         <template #item.acciones="{ item }">
           <v-btn size="small" color="primary" variant="tonal" @click="abrirDialogTomar(item)">
             Tomar
@@ -34,24 +40,39 @@
     </v-card-text>
   </v-card>
 
-  <v-dialog v-model="dialogTomar" max-width="400">
+  <v-dialog v-model="dialogTomar" max-width="440">
     <v-card>
       <v-card-title class="text-subtitle-1 font-weight-medium pa-4 pb-2">Tomar paciente</v-card-title>
-      <v-card-text>
-        ¿Confirmás que vas a atender a
-        <strong>{{ ingresoSeleccionado?.paciente?.apellido }}, {{ ingresoSeleccionado?.paciente?.nombre }}</strong>?
+      <v-card-text class="pt-2">
+        <v-alert
+          v-if="yaAsignadoAOtro"
+          type="warning"
+          variant="tonal"
+          density="compact"
+          class="mb-3"
+        >
+          Este paciente ya está asignado a
+          <strong>Dr/a. {{ ingresoSeleccionado?.medico?.apellido }}, {{ ingresoSeleccionado?.medico?.nombre }}</strong>.
+          ¿Querés reasignarlo a vos?
+        </v-alert>
+        <span v-else>
+          ¿Confirmás que vas a atender a
+          <strong>{{ ingresoSeleccionado?.paciente?.apellido }}, {{ ingresoSeleccionado?.paciente?.nombre }}</strong>?
+        </span>
       </v-card-text>
       <v-card-actions class="pa-4 pt-0">
         <v-spacer />
         <v-btn variant="text" @click="dialogTomar = false">Cancelar</v-btn>
-        <v-btn color="primary" :loading="procesando" @click="confirmarTomar">Confirmar</v-btn>
+        <v-btn :color="yaAsignadoAOtro ? 'warning' : 'primary'" :loading="procesando" @click="confirmarTomar">
+          {{ yaAsignadoAOtro ? 'Reasignar' : 'Confirmar' }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/authStore'
 import { listarIngresos, cambiarEstado, asignarMedico } from '~/services/ingresoService'
 
@@ -64,10 +85,16 @@ const ingresos = ref([])
 const ingresoSeleccionado = ref(null)
 const dialogTomar = ref(false)
 
+const yaAsignadoAOtro = computed(() =>
+  ingresoSeleccionado.value?.medico_id != null &&
+  ingresoSeleccionado.value.medico_id !== authStore.medico?.id,
+)
+
 const headers = [
   { title: 'Paciente', key: 'paciente_nombre', sortable: false },
   { title: 'DNI', key: 'paciente_dni', sortable: false },
   { title: 'Prioridad', key: 'prioridad', sortable: false },
+  { title: 'Médico asignado', key: 'medico_asignado', sortable: false },
   { title: 'Ingreso', key: 'fecha_ingreso', sortable: false },
   { title: 'Acciones', key: 'acciones', sortable: false },
 ]
