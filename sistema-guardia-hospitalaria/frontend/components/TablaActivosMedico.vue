@@ -83,6 +83,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { listarIngresos, cambiarEstado, actualizarObservacionesMedico } from '~/services/ingresoService'
+import { useWebSocket } from '~/composables/useWebSocket'
 
 const props = defineProps({
   medicoId: { type: Number, required: true },
@@ -167,4 +168,5 @@ async function confirmarAlta() {
 
 defineExpose({ recargar: cargarIngresos })
 onMounted(cargarIngresos)
+useWebSocket(cargarIngresos)
 </script>
