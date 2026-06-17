@@ -37,6 +37,12 @@
         <template #item.fecha_ingreso="{ item }">
           {{ formatFecha(item.fecha_ingreso) }}
         </template>
+        <template #item.especialidad_requerida="{ item }">
+          <v-chip v-if="item.especialidad_requerida" size="small" variant="tonal" color="info">
+            {{ item.especialidad_requerida }}
+          </v-chip>
+          <span v-else class="text-medium-emphasis text-body-2">—</span>
+        </template>
         <template #item.medico_nombre="{ item }">
           {{ item.medico ? `${item.medico.apellido}, ${item.medico.nombre}` : '—' }}
         </template>
@@ -72,6 +78,13 @@
           class="mb-3"
         />
         <v-select
+          v-model="edicionEspecialidad"
+          :items="ESPECIALIDADES"
+          label="Especialidad requerida"
+          variant="outlined"
+          class="mb-3"
+        />
+        <v-select
           v-model="edicionMedicoId"
           :items="opcionesMedicos"
           item-title="label"
@@ -97,7 +110,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { listarIngresos, actualizarPrioridad, asignarMedico } from '~/services/ingresoService'
+import { listarIngresos, actualizarPrioridad, actualizarEspecialidad, asignarMedico } from '~/services/ingresoService'
+import { ESPECIALIDADES } from '~/utils/especialidades'
 import { listarMedicosConCarga } from '~/services/medicoService'
 import { useWebSocket } from '~/composables/useWebSocket'
 
@@ -115,6 +129,7 @@ const filtro = ref('todos')
 const dialogEdicion = ref(false)
 const ingresoEditando = ref(null)
 const edicionPrioridad = ref(null)
+const edicionEspecialidad = ref(null)
 const edicionMedicoId = ref(null)
 const guardando = ref(false)
 const cargandoMedicos = ref(false)
@@ -134,6 +149,7 @@ const headers = [
   { title: 'Paciente', key: 'paciente_nombre', sortable: false },
   { title: 'DNI', key: 'paciente_dni', sortable: false },
   { title: 'Prioridad', key: 'prioridad', sortable: false },
+  { title: 'Especialidad', key: 'especialidad_requerida', sortable: false },
   { title: 'Estado', key: 'estado', sortable: false },
   { title: 'Ingreso', key: 'fecha_ingreso', sortable: false },
   { title: 'Médico', key: 'medico_nombre', sortable: false },
@@ -192,6 +208,7 @@ async function cargarIngresos() {
 async function abrirEdicion(ingreso) {
   ingresoEditando.value = ingreso
   edicionPrioridad.value = ingreso.prioridad
+  edicionEspecialidad.value = ingreso.especialidad_requerida ?? null
   edicionMedicoId.value = ingreso.medico_id ?? null
   dialogEdicion.value = true
 
@@ -213,6 +230,9 @@ async function guardarEdicion() {
 
     if (edicionPrioridad.value !== ingresoEditando.value.prioridad) {
       promesas.push(actualizarPrioridad(id, edicionPrioridad.value))
+    }
+    if (edicionEspecialidad.value !== (ingresoEditando.value.especialidad_requerida ?? null)) {
+      promesas.push(actualizarEspecialidad(id, edicionEspecialidad.value))
     }
     if (edicionMedicoId.value !== (ingresoEditando.value.medico_id ?? null)) {
       promesas.push(asignarMedico(id, edicionMedicoId.value))

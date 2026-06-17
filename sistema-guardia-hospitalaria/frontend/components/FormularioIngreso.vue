@@ -19,9 +19,9 @@
             <v-select
               v-model="especialidadRequerida"
               :items="ESPECIALIDADES"
-              label="Especialidad requerida (opcional)"
+              label="Especialidad requerida"
               variant="outlined"
-              clearable
+              :rules="[requerido]"
             />
           </v-col>
           <v-col cols="12" sm="6">
@@ -120,7 +120,7 @@ async function guardar() {
     const data = {
       paciente_id: props.pacienteId,
       prioridad: prioridad.value,
-      ...(especialidadRequerida.value ? { especialidad_requerida: especialidadRequerida.value } : {}),
+      especialidad_requerida: especialidadRequerida.value,
       ...(observaciones.value ? { observaciones: observaciones.value } : {}),
     }
     const ingreso = await crearIngreso(data)

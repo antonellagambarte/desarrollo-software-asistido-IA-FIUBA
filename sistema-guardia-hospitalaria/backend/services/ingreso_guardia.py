@@ -72,6 +72,18 @@ def actualizar_prioridad(db: Session, ingreso_id: int, prioridad) -> IngresoGuar
     return ingreso
 
 
+def actualizar_especialidad(db: Session, ingreso_id: int, especialidad_requerida: str) -> IngresoGuardia:
+    ingreso = db.get(IngresoGuardia, ingreso_id)
+    if ingreso is None:
+        raise LookupError(f"Ingreso con id {ingreso_id} no encontrado")
+    if ingreso.estado == EstadoIngreso.ALTA:
+        raise ValueError("El ingreso con estado ALTA no puede modificarse")
+    ingreso.especialidad_requerida = especialidad_requerida
+    db.commit()
+    db.refresh(ingreso)
+    return ingreso
+
+
 def actualizar_observaciones(db: Session, ingreso_id: int, observaciones: Optional[str]) -> IngresoGuardia:
     ingreso = db.get(IngresoGuardia, ingreso_id)
     if ingreso is None:

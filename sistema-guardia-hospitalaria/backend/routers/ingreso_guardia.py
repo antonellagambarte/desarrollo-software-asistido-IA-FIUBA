@@ -9,6 +9,7 @@ from schemas.ingreso_guardia import (
     CambioEstadoRequest,
     AsignacionMedicoRequest,
     ActualizarPrioridadRequest,
+    ActualizarEspecialidadRequest,
     ActualizarObservacionesRequest,
     ActualizarObservacionesMedicoRequest,
 )
@@ -61,6 +62,16 @@ def asignar_medico(ingreso_id: int, data: AsignacionMedicoRequest, background_ta
 def actualizar_prioridad(ingreso_id: int, data: ActualizarPrioridadRequest, db: Session = Depends(get_db)):
     try:
         return ingreso_service.actualizar_prioridad(db, ingreso_id, data.prioridad)
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.patch("/{ingreso_id}/especialidad", response_model=IngresoGuardiaResponse)
+def actualizar_especialidad(ingreso_id: int, data: ActualizarEspecialidadRequest, db: Session = Depends(get_db)):
+    try:
+        return ingreso_service.actualizar_especialidad(db, ingreso_id, data.especialidad_requerida)
     except LookupError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ValueError as e:
