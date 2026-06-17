@@ -21,6 +21,28 @@
       </v-card-text>
     </v-card>
 
+    <v-card v-if="!buscado && !pacienteSeleccionado && ultimosPacientes.length" class="mb-4">
+      <v-card-text>
+        <div class="text-body-2 text-medium-emphasis mb-3">Últimos pacientes registrados</div>
+        <v-list lines="two" class="pa-0">
+          <v-list-item
+            v-for="p in ultimosPacientes"
+            :key="p.id"
+            :title="`${p.apellido}, ${p.nombre}`"
+            :subtitle="`DNI ${p.dni} · ${p.edad} años`"
+            rounded="lg"
+            class="mb-1"
+            style="cursor: pointer"
+            @click="seleccionarPaciente(p)"
+          >
+            <template #append>
+              <v-icon color="primary">mdi-chevron-right</v-icon>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+
     <v-card v-if="buscado && !pacienteSeleccionado" class="mb-4">
       <v-card-text>
         <template v-if="resultados.length > 0">
@@ -83,6 +105,9 @@
       location="bottom right"
     >
       {{ snackbar.mensaje }}
+      <template #actions>
+        <v-btn variant="text" @click="snackbar.visible = false">Cerrar</v-btn>
+      </template>
     </v-snackbar>
   </v-container>
 </template>
@@ -90,12 +115,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useSidebarItems } from '~/composables/useSidebarItems'
-import { buscarPacientes } from '~/services/pacienteService'
+import { buscarPacientes, listarUltimosPacientes } from '~/services/pacienteService'
+import { obtenerIngresoActivoPorPaciente } from '~/services/ingresoService'
 
 const { items } = useSidebarItems()
 
 const query = ref('')
 const resultados = ref([])
+const ultimosPacientes = ref([])
 const buscado = ref(false)
 const pacienteSeleccionado = ref(null)
 const cargando = ref(false)
@@ -107,7 +134,14 @@ const SIDEBAR_LINKS = [
   { label: 'Pacientes activos', icon: 'mdi-clipboard-list', to: '/recepcion/activos' },
 ]
 
-onMounted(() => { items.value = SIDEBAR_LINKS })
+onMounted(async () => {
+  items.value = SIDEBAR_LINKS
+  try {
+    ultimosPacientes.value = await listarUltimosPacientes(15)
+  } catch {
+    // silencioso — la lista de recientes es informativa, no crítica
+  }
+})
 
 async function buscar() {
   if (!query.value.trim()) return
@@ -124,7 +158,20 @@ async function buscar() {
   }
 }
 
-function seleccionarPaciente(p) {
+async function seleccionarPaciente(p) {
+  try {
+    const ingresoActivo = await obtenerIngresoActivoPorPaciente(p.id)
+    if (ingresoActivo) {
+      snackbar.value = {
+        visible: true,
+        mensaje: `${p.apellido}, ${p.nombre} ya tiene un ingreso activo en guardia (${ingresoActivo.estado.replace('_', ' ')}).`,
+        color: 'warning',
+      }
+      return
+    }
+  } catch {
+    // si falla la verificación, dejamos pasar (el backend lo rechazará si aplica)
+  }
   pacienteSeleccionado.value = p
 }
 
@@ -136,7 +183,7 @@ function irANuevoPaciente() {
   navigateTo('/recepcion/nuevo')
 }
 
-function onIngresoCreado(_ingreso, advertencia) {
+async function onIngresoCreado(_ingreso, advertencia) {
   if (advertencia) {
     snackbar.value = { visible: true, mensaje: advertencia, color: 'warning' }
   } else {
@@ -146,5 +193,6 @@ function onIngresoCreado(_ingreso, advertencia) {
   resultados.value = []
   buscado.value = false
   pacienteSeleccionado.value = null
+  try { ultimosPacientes.value = await listarUltimosPacientes(15) } catch { /* silencioso */ }
 }
 </script>

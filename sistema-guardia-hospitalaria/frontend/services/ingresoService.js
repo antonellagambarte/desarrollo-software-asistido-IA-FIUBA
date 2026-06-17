@@ -10,6 +10,12 @@ export async function crearIngreso(data) {
   return res.json()
 }
 
+export async function obtenerIngresoActivoPorPaciente(pacienteId) {
+  const res = await fetch(`${BASE}/ingresos/activo-por-paciente/${pacienteId}`)
+  if (!res.ok) throw new Error('Error al verificar ingreso activo')
+  return res.json() // null si no hay ingreso activo
+}
+
 export async function listarIngresos(estado = null) {
   const url = estado ? `${BASE}/ingresos/?estado=${estado}` : `${BASE}/ingresos/`
   const res = await fetch(url)

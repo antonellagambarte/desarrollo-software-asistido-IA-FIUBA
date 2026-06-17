@@ -21,6 +21,11 @@ router = APIRouter(prefix="/ingresos", tags=["ingresos"])
 _ACTUALIZACION = {"tipo": "actualizacion"}
 
 
+@router.get("/activo-por-paciente/{paciente_id}", response_model=Optional[IngresoGuardiaResponse])
+def ingreso_activo_por_paciente(paciente_id: int, db: Session = Depends(get_db)):
+    return ingreso_service.obtener_ingreso_activo_por_paciente(db, paciente_id)
+
+
 @router.post("/", response_model=IngresoGuardiaResponse, status_code=status.HTTP_201_CREATED)
 def crear_ingreso(data: IngresoGuardiaCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     try:
@@ -29,6 +34,8 @@ def crear_ingreso(data: IngresoGuardiaCreate, background_tasks: BackgroundTasks,
         return ingreso
     except LookupError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.get("/", response_model=List[IngresoGuardiaResponse])

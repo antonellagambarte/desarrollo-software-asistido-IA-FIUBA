@@ -19,6 +19,10 @@ def obtener_pacientes(db: Session) -> List[Paciente]:
     return db.query(Paciente).all()
 
 
+def obtener_ultimos_pacientes(db: Session, limit: int) -> List[Paciente]:
+    return db.query(Paciente).order_by(Paciente.id.desc()).limit(limit).all()
+
+
 def obtener_paciente_por_dni(db: Session, dni: str) -> Optional[Paciente]:
     return db.query(Paciente).filter(Paciente.dni == dni).first()
 

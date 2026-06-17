@@ -17,9 +17,11 @@ def crear_paciente(data: PacienteCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=List[PacienteResponse])
-def listar_pacientes(q: Optional[str] = None, db: Session = Depends(get_db)):
+def listar_pacientes(q: Optional[str] = None, limit: Optional[int] = None, db: Session = Depends(get_db)):
     if q is not None:
         return paciente_service.buscar_pacientes(db, q)
+    if limit is not None:
+        return paciente_service.obtener_ultimos_pacientes(db, limit)
     return paciente_service.obtener_pacientes(db)
 
 

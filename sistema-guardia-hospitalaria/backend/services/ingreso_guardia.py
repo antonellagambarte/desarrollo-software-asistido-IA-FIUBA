@@ -11,9 +11,22 @@ TRANSICIONES_VALIDAS = {
 }
 
 
+def obtener_ingreso_activo_por_paciente(db: Session, paciente_id: int) -> Optional[IngresoGuardia]:
+    return (
+        db.query(IngresoGuardia)
+        .filter(
+            IngresoGuardia.paciente_id == paciente_id,
+            IngresoGuardia.estado != EstadoIngreso.ALTA,
+        )
+        .first()
+    )
+
+
 def crear_ingreso(db: Session, data: IngresoGuardiaCreate) -> IngresoGuardia:
     if not db.get(Paciente, data.paciente_id):
         raise LookupError(f"Paciente con id {data.paciente_id} no encontrado")
+    if obtener_ingreso_activo_por_paciente(db, data.paciente_id):
+        raise ValueError("El paciente ya tiene un ingreso activo en guardia")
     ingreso = IngresoGuardia(
         paciente_id=data.paciente_id,
         prioridad=data.prioridad,

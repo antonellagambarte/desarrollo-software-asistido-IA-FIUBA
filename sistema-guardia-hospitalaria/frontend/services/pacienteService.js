@@ -18,6 +18,12 @@ export async function crearPaciente(data) {
   return res.json()
 }
 
+export async function listarUltimosPacientes(limit = 15) {
+  const res = await fetch(`${BASE}/pacientes/?limit=${limit}`)
+  if (!res.ok) throw new Error('Error al cargar pacientes recientes')
+  return res.json()
+}
+
 export async function buscarPacientes(q) {
   const res = await fetch(`${BASE}/pacientes/?q=${encodeURIComponent(q)}`)
   if (!res.ok) throw new Error('Error al buscar pacientes')
