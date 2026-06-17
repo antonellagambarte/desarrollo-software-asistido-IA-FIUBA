@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useSidebarItems } from '~/composables/useSidebarItems'
 import { buscarPacientes, listarUltimosPacientes } from '~/services/pacienteService'
 import { obtenerIngresoActivoPorPaciente } from '~/services/ingresoService'
@@ -140,6 +140,13 @@ onMounted(async () => {
     ultimosPacientes.value = await listarUltimosPacientes(15)
   } catch {
     // silencioso — la lista de recientes es informativa, no crítica
+  }
+})
+
+watch(query, (val) => {
+  if (!val || !val.trim()) {
+    buscado.value = false
+    resultados.value = []
   }
 })
 
