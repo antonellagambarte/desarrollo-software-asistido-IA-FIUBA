@@ -8,6 +8,8 @@ from schemas.ingreso_guardia import (
     IngresoGuardiaResponse,
     CambioEstadoRequest,
     AsignacionMedicoRequest,
+    ActualizarPrioridadRequest,
+    ActualizarEspecialidadRequest,
     ActualizarObservacionesRequest,
     ActualizarObservacionesMedicoRequest,
 )
@@ -19,6 +21,11 @@ router = APIRouter(prefix="/ingresos", tags=["ingresos"])
 _ACTUALIZACION = {"tipo": "actualizacion"}
 
 
+@router.get("/activo-por-paciente/{paciente_id}", response_model=Optional[IngresoGuardiaResponse])
+def ingreso_activo_por_paciente(paciente_id: int, db: Session = Depends(get_db)):
+    return ingreso_service.obtener_ingreso_activo_por_paciente(db, paciente_id)
+
+
 @router.post("/", response_model=IngresoGuardiaResponse, status_code=status.HTTP_201_CREATED)
 def crear_ingreso(data: IngresoGuardiaCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     try:
@@ -27,6 +34,8 @@ def crear_ingreso(data: IngresoGuardiaCreate, background_tasks: BackgroundTasks,
         return ingreso
     except LookupError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.get("/", response_model=List[IngresoGuardiaResponse])
@@ -54,6 +63,26 @@ def asignar_medico(ingreso_id: int, data: AsignacionMedicoRequest, background_ta
         return ingreso
     except LookupError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.patch("/{ingreso_id}/prioridad", response_model=IngresoGuardiaResponse)
+def actualizar_prioridad(ingreso_id: int, data: ActualizarPrioridadRequest, db: Session = Depends(get_db)):
+    try:
+        return ingreso_service.actualizar_prioridad(db, ingreso_id, data.prioridad)
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.patch("/{ingreso_id}/especialidad", response_model=IngresoGuardiaResponse)
+def actualizar_especialidad(ingreso_id: int, data: ActualizarEspecialidadRequest, db: Session = Depends(get_db)):
+    try:
+        return ingreso_service.actualizar_especialidad(db, ingreso_id, data.especialidad_requerida)
+    except LookupError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.patch("/{ingreso_id}/observaciones", response_model=IngresoGuardiaResponse)

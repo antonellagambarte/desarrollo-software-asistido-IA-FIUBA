@@ -1,11 +1,23 @@
 <template>
   <v-card>
     <v-card-text>
-      <div class="text-subtitle-1 font-weight-medium mb-4">Pacientes en guardia</div>
+      <div class="d-flex align-center justify-space-between mb-4">
+        <div class="text-subtitle-1 font-weight-medium">Pacientes en guardia</div>
+        <v-select
+          v-model="filtroEspecialidad"
+          :items="especialidadesDisponibles"
+          label="Filtrar por especialidad"
+          variant="outlined"
+          density="compact"
+          clearable
+          hide-details
+          style="max-width: 240px"
+        />
+      </div>
 
       <v-data-table
         :headers="headers"
-        :items="ingresos"
+        :items="ingresosVisibles"
         item-value="id"
         :loading="cargando"
         no-data-text="No hay pacientes en espera"
@@ -24,6 +36,12 @@
         </template>
         <template #item.fecha_ingreso="{ item }">
           {{ formatFecha(item.fecha_ingreso) }}
+        </template>
+        <template #item.especialidad_requerida="{ item }">
+          <v-chip v-if="item.especialidad_requerida" size="small" variant="tonal" color="info">
+            {{ item.especialidad_requerida }}
+          </v-chip>
+          <span v-else class="text-medium-emphasis text-body-2">—</span>
         </template>
         <template #item.medico_asignado="{ item }">
           <span v-if="item.medico" class="text-body-2">
@@ -83,6 +101,22 @@ const authStore = useAuthStore()
 const cargando = ref(false)
 const procesando = ref(false)
 const ingresos = ref([])
+const filtroEspecialidad = ref(null)
+
+const especialidadesDisponibles = computed(() => {
+  const set = new Set(ingresos.value.map((i) => i.especialidad_requerida).filter(Boolean))
+  return [...set].sort()
+})
+
+const ingresosVisibles = computed(() => {
+  const medicoId = authStore.medico?.id ?? null
+  return ingresos.value.filter((i) => {
+    if (medicoId !== null && i.medico_id === medicoId) return false
+    if (filtroEspecialidad.value && i.especialidad_requerida !== filtroEspecialidad.value) return false
+    return true
+  })
+})
+
 const ingresoSeleccionado = ref(null)
 const dialogTomar = ref(false)
 
@@ -95,6 +129,7 @@ const headers = [
   { title: 'Paciente', key: 'paciente_nombre', sortable: false },
   { title: 'DNI', key: 'paciente_dni', sortable: false },
   { title: 'Prioridad', key: 'prioridad', sortable: false },
+  { title: 'Especialidad', key: 'especialidad_requerida', sortable: false },
   { title: 'Médico asignado', key: 'medico_asignado', sortable: false },
   { title: 'Ingreso', key: 'fecha_ingreso', sortable: false },
   { title: 'Acciones', key: 'acciones', sortable: false },
@@ -106,7 +141,8 @@ function colorPrioridad(p) {
 
 function formatFecha(iso) {
   if (!iso) return '—'
-  const d = new Date(iso)
+  const isoUtc = /[Z+]/.test(iso) ? iso : iso + 'Z'
+  const d = new Date(isoUtc)
   const dd = String(d.getDate()).padStart(2, '0')
   const mm = String(d.getMonth() + 1).padStart(2, '0')
   const hh = String(d.getHours()).padStart(2, '0')

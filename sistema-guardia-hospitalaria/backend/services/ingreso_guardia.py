@@ -11,12 +11,26 @@ TRANSICIONES_VALIDAS = {
 }
 
 
+def obtener_ingreso_activo_por_paciente(db: Session, paciente_id: int) -> Optional[IngresoGuardia]:
+    return (
+        db.query(IngresoGuardia)
+        .filter(
+            IngresoGuardia.paciente_id == paciente_id,
+            IngresoGuardia.estado != EstadoIngreso.ALTA,
+        )
+        .first()
+    )
+
+
 def crear_ingreso(db: Session, data: IngresoGuardiaCreate) -> IngresoGuardia:
     if not db.get(Paciente, data.paciente_id):
         raise LookupError(f"Paciente con id {data.paciente_id} no encontrado")
+    if obtener_ingreso_activo_por_paciente(db, data.paciente_id):
+        raise ValueError("El paciente ya tiene un ingreso activo en guardia")
     ingreso = IngresoGuardia(
         paciente_id=data.paciente_id,
         prioridad=data.prioridad,
+        especialidad_requerida=data.especialidad_requerida,
         observaciones=data.observaciones,
         estado=EstadoIngreso.EN_ESPERA,
     )
@@ -54,6 +68,30 @@ def asignar_medico(db: Session, ingreso_id: int, medico_id: int) -> IngresoGuard
     if not db.get(Medico, medico_id):
         raise LookupError(f"Médico con id {medico_id} no encontrado")
     ingreso.medico_id = medico_id
+    db.commit()
+    db.refresh(ingreso)
+    return ingreso
+
+
+def actualizar_prioridad(db: Session, ingreso_id: int, prioridad) -> IngresoGuardia:
+    ingreso = db.get(IngresoGuardia, ingreso_id)
+    if ingreso is None:
+        raise LookupError(f"Ingreso con id {ingreso_id} no encontrado")
+    if ingreso.estado == EstadoIngreso.ALTA:
+        raise ValueError("El ingreso con estado ALTA no puede modificarse")
+    ingreso.prioridad = prioridad
+    db.commit()
+    db.refresh(ingreso)
+    return ingreso
+
+
+def actualizar_especialidad(db: Session, ingreso_id: int, especialidad_requerida: str) -> IngresoGuardia:
+    ingreso = db.get(IngresoGuardia, ingreso_id)
+    if ingreso is None:
+        raise LookupError(f"Ingreso con id {ingreso_id} no encontrado")
+    if ingreso.estado == EstadoIngreso.ALTA:
+        raise ValueError("El ingreso con estado ALTA no puede modificarse")
+    ingreso.especialidad_requerida = especialidad_requerida
     db.commit()
     db.refresh(ingreso)
     return ingreso

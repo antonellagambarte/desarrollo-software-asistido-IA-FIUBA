@@ -10,6 +10,17 @@ from ws.connection_manager import manager
 
 Base.metadata.create_all(bind=engine)
 
+# Migración: agregar columna especialidad_requerida si no existe
+with engine.connect() as conn:
+    cols = [row[1] for row in conn.execute(
+        __import__('sqlalchemy').text("PRAGMA table_info(ingresos_guardia)")
+    )]
+    if 'especialidad_requerida' not in cols:
+        conn.execute(__import__('sqlalchemy').text(
+            "ALTER TABLE ingresos_guardia ADD COLUMN especialidad_requerida TEXT"
+        ))
+        conn.commit()
+
 app = FastAPI()
 
 app.add_middleware(

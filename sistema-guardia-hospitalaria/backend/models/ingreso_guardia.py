@@ -26,6 +26,7 @@ class IngresoGuardia(Base):
     estado = Column(SAEnum(EstadoIngreso), default=EstadoIngreso.EN_ESPERA, nullable=False)
     prioridad = Column(SAEnum(Prioridad), nullable=False)
     fecha_ingreso = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    especialidad_requerida = Column(String, nullable=True)
     observaciones = Column(Text, nullable=True)
     observaciones_medico = Column(Text, nullable=True)
 

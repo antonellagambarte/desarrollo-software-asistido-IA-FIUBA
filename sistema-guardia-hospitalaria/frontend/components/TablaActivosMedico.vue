@@ -36,12 +36,19 @@
         </template>
         <template #item.acciones="{ item }">
           <div class="d-flex ga-2">
-            <v-btn size="small" color="secondary" variant="tonal" @click="abrirDialogObservaciones(item)">
-              Obs.
-            </v-btn>
-            <v-btn size="small" color="success" variant="tonal" @click="abrirDialogAlta(item)">
-              Alta
-            </v-btn>
+            <template v-if="item.estado === 'EN_ESPERA'">
+              <v-btn size="small" color="primary" variant="tonal" :loading="procesandoId === item.id" @click="atender(item)">
+                Atender
+              </v-btn>
+            </template>
+            <template v-else>
+              <v-btn size="small" color="secondary" variant="tonal" @click="abrirDialogObservaciones(item)">
+                Obs.
+              </v-btn>
+              <v-btn size="small" color="success" variant="tonal" @click="abrirDialogAlta(item)">
+                Alta
+              </v-btn>
+            </template>
           </div>
         </template>
       </v-data-table>
@@ -92,6 +99,7 @@ const emit = defineEmits(['error'])
 
 const cargando = ref(false)
 const procesando = ref(false)
+const procesandoId = ref(null)
 const ingresos = ref([])
 const ingresoSeleccionado = ref(null)
 const dialogObservaciones = ref(false)
@@ -121,7 +129,8 @@ function colorEstado(e) {
 
 function formatFecha(iso) {
   if (!iso) return '—'
-  const d = new Date(iso)
+  const isoUtc = /[Z+]/.test(iso) ? iso : iso + 'Z'
+  const d = new Date(isoUtc)
   const dd = String(d.getDate()).padStart(2, '0')
   const mm = String(d.getMonth() + 1).padStart(2, '0')
   const hh = String(d.getHours()).padStart(2, '0')
@@ -137,6 +146,18 @@ async function cargarIngresos() {
     emit('error', 'Error al cargar pacientes.')
   } finally {
     cargando.value = false
+  }
+}
+
+async function atender(ingreso) {
+  procesandoId.value = ingreso.id
+  try {
+    await cambiarEstado(ingreso.id, 'EN_ATENCION')
+    await cargarIngresos()
+  } catch {
+    emit('error', 'Error al iniciar la atención.')
+  } finally {
+    procesandoId.value = null
   }
 }
 

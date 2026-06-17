@@ -1,5 +1,5 @@
 <template>
-  <v-container class="py-6" style="max-width: 960px">
+  <v-container class="py-6" style="max-width: 1300px">
     <div class="text-h5 font-weight-medium mb-6">Recepción</div>
 
     <v-text-field

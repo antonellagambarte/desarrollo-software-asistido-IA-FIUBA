@@ -15,7 +15,7 @@
         <div class="text-caption text-medium-emphasis mb-1">Observaciones de recepción</div>
         <div
           class="text-body-2 mb-4 pa-3 rounded"
-          style="min-height: 48px; background: rgba(var(--v-theme-surface-variant), 1)"
+          style="min-height: 48px; background: rgba(0,0,0,0.04); color: rgba(var(--v-theme-on-surface), 0.87)"
         >
           {{ ingreso?.observaciones || 'Sin observaciones de recepción' }}
         </div>

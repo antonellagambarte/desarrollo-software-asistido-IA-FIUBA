@@ -57,6 +57,7 @@ Proyecto pensado para ejecución local solamente.
 
 ```bash
 cd backend
+source venv/bin/activate
 uvicorn main:app --reload
 ```
 

@@ -17,6 +17,15 @@
           </v-col>
           <v-col cols="12" sm="6">
             <v-select
+              v-model="especialidadRequerida"
+              :items="ESPECIALIDADES"
+              label="Especialidad requerida"
+              variant="outlined"
+              :rules="[requerido]"
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-select
               v-model="medicoId"
               :items="opcionesMedicos"
               item-title="label"
@@ -54,6 +63,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { crearIngreso, asignarMedico } from '~/services/ingresoService'
 import { listarMedicosConCarga } from '~/services/medicoService'
+import { ESPECIALIDADES } from '~/utils/especialidades'
 
 const props = defineProps({
   pacienteId: { type: Number, required: true },
@@ -66,6 +76,7 @@ const cargando = ref(false)
 const cargandoMedicos = ref(false)
 const error = ref('')
 const prioridad = ref(null)
+const especialidadRequerida = ref(null)
 const observaciones = ref('')
 const medicoId = ref(null)
 const medicos = ref([])
@@ -109,6 +120,7 @@ async function guardar() {
     const data = {
       paciente_id: props.pacienteId,
       prioridad: prioridad.value,
+      especialidad_requerida: especialidadRequerida.value,
       ...(observaciones.value ? { observaciones: observaciones.value } : {}),
     }
     const ingreso = await crearIngreso(data)
