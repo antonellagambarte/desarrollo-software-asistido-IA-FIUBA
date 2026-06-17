@@ -37,6 +37,10 @@ class IngresoGuardiaResponse(BaseModel):
     medico: Optional[MedicoResponse] = None
 
 
+class ActualizarPrioridadRequest(BaseModel):
+    prioridad: Prioridad
+
+
 class ActualizarObservacionesRequest(BaseModel):
     observaciones: Optional[str] = None
 

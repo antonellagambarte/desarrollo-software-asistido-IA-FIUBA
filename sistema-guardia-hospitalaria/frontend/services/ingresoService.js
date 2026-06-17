@@ -37,6 +37,16 @@ export async function asignarMedico(ingresoId, medicoId) {
   return res.json()
 }
 
+export async function actualizarPrioridad(ingresoId, prioridad) {
+  const res = await fetch(`${BASE}/ingresos/${ingresoId}/prioridad`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prioridad }),
+  })
+  if (!res.ok) throw new Error('Error al actualizar prioridad')
+  return res.json()
+}
+
 export async function actualizarObservaciones(ingresoId, observaciones) {
   const res = await fetch(`${BASE}/ingresos/${ingresoId}/observaciones`, {
     method: 'PATCH',

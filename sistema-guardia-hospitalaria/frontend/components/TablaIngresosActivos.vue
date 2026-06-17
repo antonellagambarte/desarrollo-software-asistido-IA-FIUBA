@@ -40,14 +40,65 @@
         <template #item.medico_nombre="{ item }">
           {{ item.medico ? `${item.medico.apellido}, ${item.medico.nombre}` : '—' }}
         </template>
+        <template #item.acciones="{ item }">
+          <v-btn
+            v-if="item.estado !== 'ALTA'"
+            size="small"
+            variant="tonal"
+            color="primary"
+            @click="abrirEdicion(item)"
+          >
+            Editar
+          </v-btn>
+        </template>
       </v-data-table>
     </v-card-text>
   </v-card>
+
+  <v-dialog v-model="dialogEdicion" max-width="480">
+    <v-card>
+      <v-card-title class="text-subtitle-1 font-weight-medium pa-4 pb-2">
+        Editar ingreso
+      </v-card-title>
+      <v-card-subtitle class="px-4 pb-2">
+        {{ ingresoEditando?.paciente?.apellido }}, {{ ingresoEditando?.paciente?.nombre }}
+      </v-card-subtitle>
+      <v-card-text class="pt-2">
+        <v-select
+          v-model="edicionPrioridad"
+          :items="prioridades"
+          label="Prioridad"
+          variant="outlined"
+          class="mb-3"
+        />
+        <v-select
+          v-model="edicionMedicoId"
+          :items="opcionesMedicos"
+          item-title="label"
+          item-value="id"
+          label="Médico asignado (opcional)"
+          variant="outlined"
+          clearable
+          :loading="cargandoMedicos"
+        />
+      </v-card-text>
+      <v-card-actions class="pa-4 pt-0">
+        <v-spacer />
+        <v-btn variant="text" @click="dialogEdicion = false">Cancelar</v-btn>
+        <v-btn color="primary" :loading="guardando" @click="guardarEdicion">Guardar</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-snackbar v-model="snackbar.visible" :color="snackbar.color" :timeout="3000" location="bottom right">
+    {{ snackbar.mensaje }}
+  </v-snackbar>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { listarIngresos } from '~/services/ingresoService'
+import { listarIngresos, actualizarPrioridad, asignarMedico } from '~/services/ingresoService'
+import { listarMedicosConCarga } from '~/services/medicoService'
 import { useWebSocket } from '~/composables/useWebSocket'
 
 const props = defineProps({
@@ -61,6 +112,24 @@ const cargando = ref(false)
 const ingresos = ref([])
 const filtro = ref('todos')
 
+const dialogEdicion = ref(false)
+const ingresoEditando = ref(null)
+const edicionPrioridad = ref(null)
+const edicionMedicoId = ref(null)
+const guardando = ref(false)
+const cargandoMedicos = ref(false)
+const medicos = ref([])
+const snackbar = ref({ visible: false, mensaje: '', color: 'success' })
+
+const prioridades = ['BAJA', 'MEDIA', 'ALTA']
+
+const opcionesMedicos = computed(() =>
+  medicos.value.map((m) => ({
+    id: m.id,
+    label: `${m.apellido}, ${m.nombre} (${m.especialidad})`,
+  }))
+)
+
 const headers = [
   { title: 'Paciente', key: 'paciente_nombre', sortable: false },
   { title: 'DNI', key: 'paciente_dni', sortable: false },
@@ -68,6 +137,7 @@ const headers = [
   { title: 'Estado', key: 'estado', sortable: false },
   { title: 'Ingreso', key: 'fecha_ingreso', sortable: false },
   { title: 'Médico', key: 'medico_nombre', sortable: false },
+  { title: '', key: 'acciones', sortable: false },
 ]
 
 const ingresosFiltrados = computed(() => {
@@ -98,7 +168,9 @@ function etiquetaEstado(e) {
 }
 
 function formatFecha(iso) {
-  const d = new Date(iso)
+  if (!iso) return '—'
+  const isoUtc = /[Z+]/.test(iso) ? iso : iso + 'Z'
+  const d = new Date(isoUtc)
   const dd = String(d.getDate()).padStart(2, '0')
   const mm = String(d.getMonth() + 1).padStart(2, '0')
   const hh = String(d.getHours()).padStart(2, '0')
@@ -114,6 +186,46 @@ async function cargarIngresos() {
     emit('error', 'Error al cargar pacientes activos.')
   } finally {
     cargando.value = false
+  }
+}
+
+async function abrirEdicion(ingreso) {
+  ingresoEditando.value = ingreso
+  edicionPrioridad.value = ingreso.prioridad
+  edicionMedicoId.value = ingreso.medico_id ?? null
+  dialogEdicion.value = true
+
+  if (medicos.value.length === 0) {
+    cargandoMedicos.value = true
+    try {
+      medicos.value = await listarMedicosConCarga()
+    } finally {
+      cargandoMedicos.value = false
+    }
+  }
+}
+
+async function guardarEdicion() {
+  guardando.value = true
+  try {
+    const id = ingresoEditando.value.id
+    const promesas = []
+
+    if (edicionPrioridad.value !== ingresoEditando.value.prioridad) {
+      promesas.push(actualizarPrioridad(id, edicionPrioridad.value))
+    }
+    if (edicionMedicoId.value !== (ingresoEditando.value.medico_id ?? null)) {
+      promesas.push(asignarMedico(id, edicionMedicoId.value))
+    }
+
+    await Promise.all(promesas)
+    dialogEdicion.value = false
+    snackbar.value = { visible: true, mensaje: 'Ingreso actualizado.', color: 'success' }
+    await cargarIngresos()
+  } catch {
+    snackbar.value = { visible: true, mensaje: 'Error al guardar los cambios.', color: 'error' }
+  } finally {
+    guardando.value = false
   }
 }
 
