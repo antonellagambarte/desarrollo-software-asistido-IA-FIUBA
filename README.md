@@ -8,7 +8,7 @@ Contiene ejercicios y proyectos desarrollados utilizando herramientas de asisten
 
 - Actividad 1: creación de bad UI con ChatGPT.
 - Actividad 2: especificación de API REST utilizando estándar OpenAPI utilizando ChatGPT.
-- Sistema de guardia hopitalaria: sistema para el manejo de guardia hospitalaria. Realizado con asistencia de CLAUDE.
+- Sistema de guardia hospitalaria: sistema para el manejo de guardia hospitalaria. Realizado con asistencia de CLAUDE.
 - Presentación del proyecto de sistema de guardia hospitalaria.
 
 ## Autora
