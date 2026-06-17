@@ -5,7 +5,7 @@
 
       <v-data-table
         :headers="headers"
-        :items="ingresos"
+        :items="ingresosVisibles"
         item-value="id"
         :loading="cargando"
         no-data-text="No hay pacientes en espera"
@@ -89,6 +89,10 @@ const authStore = useAuthStore()
 const cargando = ref(false)
 const procesando = ref(false)
 const ingresos = ref([])
+
+const ingresosVisibles = computed(() =>
+  ingresos.value.filter((i) => i.medico_id !== authStore.medico?.id),
+)
 const ingresoSeleccionado = ref(null)
 const dialogTomar = ref(false)
 
